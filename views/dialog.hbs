@@ -1,0 +1,405 @@
+{{!< layout}}
+
+{{#contentFor 'pageStyles'}}
+<style>
+  body {
+    font-family: sans-serif;
+    font-size: small;
+    padding: 10px;
+    line-height: 1.4em;
+  }
+</style>
+{{/contentFor}}
+
+<!-- The dialog has a primary action, declared in the descriptor atlassian-connect.json -->
+<!-- It is implemented in the js/addon.js file imported in the layout -->
+
+<a href="" target="_blank">Open in New Tab</a>
+<table style="width: 100%; margin-left: auto; margin-right: auto;">
+  <tr>
+    <td style="width: 50%;">
+      <table align="left">
+        <tr class="half-bracket">
+          <td class="region"> <!-- East -->
+            <ul class="round" style="margin-top: 10px;">
+              <li class="spacer">&nbsp;</li>
+
+              {{#each bracketData.east.[1st Round]}}
+                <li class="game game-top">
+                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
+                </li>
+                <li class="game game-spacer-left">&nbsp;</li>
+                <li class="game game-bottom">
+                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
+                </li>
+
+                <li class="spacer">&nbsp;</li>
+              {{/each}}
+            </ul>
+
+            <ul class="round">
+              <li class="spacer">&nbsp;</li>
+
+              {{#each bracketData.east.[2nd Round]}}
+                <li class="game game-top">
+                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
+                </li>
+                <li class="game game-spacer-left">&nbsp;</li>
+                <li class="game game-bottom">
+                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
+                </li>
+
+                <li class="spacer">&nbsp;</li>
+              {{/each}}
+            </ul>
+
+            <ul class="round">
+              <li class="spacer">&nbsp;</li>
+
+              {{#each bracketData.east.[Sweet 16]}}
+                <li class="game game-top">
+                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
+                </li>
+                <li class="game game-spacer-left">&nbsp;</li>
+                <li class="game game-bottom">
+                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
+                </li>
+
+                <li class="spacer">&nbsp;</li>
+              {{/each}}
+            </ul>
+
+            <ul class="round">
+              <li class="spacer">&nbsp;</li>
+
+              {{#each bracketData.east.[Elite 8]}}
+                <li class="game game-top">
+                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
+                </li>
+                <li class="game game-spacer-left">&nbsp;</li>
+                <li class="game game-bottom">
+                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
+                </li>
+
+                <li class="spacer">&nbsp;</li>
+              {{/each}}
+            </ul>
+          </td>
+        </tr>
+      </table>
+    </td>
+
+    <td style="width: 50%;">
+      <table align="right">
+        <tr class="half-bracket">
+          <td class="region"> <!-- Midwest -->
+            <ul class="round">
+              <li class="spacer">&nbsp;</li>
+
+              {{#each bracketData.midwest.[Elite 8]}}
+                <li class="game game-top">
+                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
+                </li>
+                <li class="game game-spacer-right">&nbsp;</li>
+                <li class="game game-bottom">
+                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
+                </li>
+
+                <li class="spacer">&nbsp;</li>
+              {{/each}}
+            </ul>
+
+            <ul class="round">
+              <li class="spacer">&nbsp;</li>
+
+              {{#each bracketData.midwest.[Sweet 16]}}
+                <li class="game game-top">
+                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
+                </li>
+                <li class="game game-spacer-right">&nbsp;</li>
+                <li class="game game-bottom">
+                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
+                </li>
+
+                <li class="spacer">&nbsp;</li>
+              {{/each}}
+            </ul>
+
+            <ul class="round">
+              <li class="spacer">&nbsp;</li>
+
+              {{#each bracketData.midwest.[2nd Round]}}
+                <li class="game game-top">
+                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
+                </li>
+                <li class="game game-spacer-right">&nbsp;</li>
+                <li class="game game-bottom">
+                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
+                </li>
+
+                <li class="spacer">&nbsp;</li>
+              {{/each}}
+            </ul>
+            
+            <ul class="round">
+              <li class="spacer">&nbsp;</li>
+
+              {{#each bracketData.midwest.[1st Round]}}
+                <li class="game game-top">
+                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
+                </li>
+                <li class="game game-spacer-right">&nbsp;</li>
+                <li class="game game-bottom">
+                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
+                </li>
+
+                <li class="spacer">&nbsp;</li>
+              {{/each}}
+            </ul>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<table style="width: 100%; margin-left: auto; margin-right: auto;">
+  <tr>
+    <td style="width: 33%;">
+      <table align="right">
+        <tr>
+          <td class="region">
+            <ul class="round">
+              <li class="spacer">&nbsp;</li>
+
+              <li class="game game-top">
+                <span class="seed">
+                  {{bracketData.national.[Final Four].east.seed}}
+                </span> {{bracketData.national.[Final Four].east.name}} <span
+                  class="score">{{bracketData.national.[Final Four].east.score}}
+                </span>
+              </li>
+              <li class="game game-spacer-left">&nbsp;</li>
+              <li class="game game-bottom">
+                <span class="seed">
+                  {{bracketData.national.[Final Four].west.seed}}
+                </span> {{bracketData.national.[Final Four].west.name}} <span
+                  class="score">{{bracketData.national.[Final Four].west.score}}
+                </span>
+              </li>
+
+              <li class="spacer">&nbsp;</li>
+            </ul>
+          </td>
+        </tr>
+      </table>
+    </td>
+
+    <td style="width: 33%;">
+      <table align="center">
+        <tr>
+          <td class="region"> <!-- Championship -->
+            <ul class="round">
+              <li class="spacer">&nbsp;</li>
+
+              <li class="game game-top">
+                <span class="seed">
+                  {{bracketData.national.Championship.team1.seed}}
+                </span> {{bracketData.national.Championship.team1.name}} <span
+                  class="score">{{bracketData.national.Championship.team1.score}}
+                </span>
+              </li>
+              <li class="game game-spacer-mid">&nbsp;</li>
+              <li class="game game-bottom">
+                <span class="seed">
+                  {{bracketData.national.Championship.team2.seed}}
+                </span> {{bracketData.national.Championship.team2.name}} <span
+                  class="score">{{bracketData.national.Championship.team2.score}}
+                </span>
+              </li>
+
+              <li class="spacer">&nbsp;</li>
+            </ul>
+          </td>
+        </tr>
+      </table>
+    </td>
+
+    <td style="width: 33%;">
+      <table align="left">
+        <tr>
+          <td class="region">
+            <ul class="round">
+              <li class="spacer">&nbsp;</li>
+
+              <li class="game game-top">
+                <span class="seed">
+                  {{bracketData.national.[Final Four].midwest.seed}}
+                </span> {{bracketData.national.[Final Four].midwest.name}} <span
+                  class="score">{{bracketData.national.[Final Four].midwest.score}}
+                </span>
+              </li>
+              <li class="game game-spacer-right">&nbsp;</li>
+              <li class="game game-bottom">
+                <span class="seed">
+                  {{bracketData.national.[Final Four].south.seed}}
+                </span> {{bracketData.national.[Final Four].south.name}} <span
+                  class="score">{{bracketData.national.[Final Four].south.score}}
+                </span>
+              </li>
+
+              <li class="spacer">&nbsp;</li>
+            </ul>
+          </td>
+        </tr>
+      </table>
+    </td>
+</table>
+
+<table style="width: 100%; margin-left: auto; margin-right: auto;">
+  <tr>
+    <td style="width: 50%;">
+      <table align="left">
+        <tr class="half-bracket">
+          <td class="region"> <!-- West -->
+            <ul class="round">
+              <li class="spacer">&nbsp;</li>
+
+              {{#each bracketData.west.[1st Round]}}
+                <li class="game game-top">
+                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
+                </li>
+                <li class="game game-spacer-left">&nbsp;</li>
+                <li class="game game-bottom">
+                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
+                </li>
+
+                <li class="spacer">&nbsp;</li>
+              {{/each}}
+            </ul>
+
+            <ul class="round">
+              <li class="spacer">&nbsp;</li>
+
+              {{#each bracketData.west.[2nd Round]}}
+                <li class="game game-top">
+                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
+                </li>
+                <li class="game game-spacer-left">&nbsp;</li>
+                <li class="game game-bottom">
+                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
+                </li>
+
+                <li class="spacer">&nbsp;</li>
+              {{/each}}
+            </ul>
+
+            <ul class="round">
+              <li class="spacer">&nbsp;</li>
+
+              {{#each bracketData.west.[Sweet 16]}}
+                <li class="game game-top">
+                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
+                </li>
+                <li class="game game-spacer-left">&nbsp;</li>
+                <li class="game game-bottom">
+                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
+                </li>
+
+                <li class="spacer">&nbsp;</li>
+              {{/each}}
+            </ul>
+            
+            <ul class="round">
+              <li class="spacer">&nbsp;</li>
+
+              {{#each bracketData.west.[Elite 8]}}
+                <li class="game game-top">
+                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
+                </li>
+                <li class="game game-spacer-left">&nbsp;</li>
+                <li class="game game-bottom">
+                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
+                </li>
+
+                <li class="spacer">&nbsp;</li>
+              {{/each}}
+            </ul>
+          </td>
+        </tr>
+      </table>
+    </td>
+
+    <td style="width: 50%;">
+      <table align="right">
+        <tr class="half-bracket">
+          <td class="region"> <!-- South -->
+            <ul class="round">
+              <li class="spacer">&nbsp;</li>
+
+              {{#each bracketData.south.[Elite 8]}}
+                <li class="game game-top">
+                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
+                </li>
+                <li class="game game-spacer-right">&nbsp;</li>
+                <li class="game game-bottom">
+                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
+                </li>
+
+                <li class="spacer">&nbsp;</li>
+              {{/each}}
+            </ul>
+
+            <ul class="round">
+              <li class="spacer">&nbsp;</li>
+
+              {{#each bracketData.south.[Sweet 16]}}
+                <li class="game game-top">
+                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
+                </li>
+                <li class="game game-spacer-right">&nbsp;</li>
+                <li class="game game-bottom">
+                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
+                </li>
+
+                <li class="spacer">&nbsp;</li>
+              {{/each}}
+            </ul>
+
+            <ul class="round">
+              <li class="spacer">&nbsp;</li>
+
+              {{#each bracketData.south.[2nd Round]}}
+                <li class="game game-top">
+                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
+                </li>
+                <li class="game game-spacer-right">&nbsp;</li>
+                <li class="game game-bottom">
+                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
+                </li>
+
+                <li class="spacer">&nbsp;</li>
+              {{/each}}
+            </ul>
+            
+            <ul class="round">
+              <li class="spacer">&nbsp;</li>
+
+              {{#each bracketData.south.[1st Round]}}
+                <li class="game game-top">
+                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
+                </li>
+                <li class="game game-spacer-right">&nbsp;</li>
+                <li class="game game-bottom">
+                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
+                </li>
+
+                <li class="spacer">&nbsp;</li>
+              {{/each}}
+            </ul>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>

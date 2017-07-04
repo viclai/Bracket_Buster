@@ -1,0 +1,95 @@
+{
+  "key": "bb-add-on",
+  "name": "Bracket Buster",
+  "description": "A HipChat add-on to challenge your colleagues in predicting March Madness games.",
+  "vendor": {
+    "name": "Victor Lai",
+    "url": "https://viclai.github.io/"
+  },
+  "links": {
+    "self": "{{localBaseUrl}}/atlassian-connect.json",
+    "homepage": "{{localBaseUrl}}"
+  },
+  "capabilities": {
+    "hipchatApiConsumer": {
+      "scopes": [
+        "send_notification",
+        "view_room"
+      ],
+      "avatar": {
+        "url": "{{localBaseUrl}}/img/bracket.png",
+        "url@2x": "{{localBaseUrl}}/img/bracket.png"
+      }
+    },
+    "installable": {
+      "callbackUrl": "{{localBaseUrl}}/installable"
+    },
+    "configurable": {
+      "url": "{{localBaseUrl}}/config"
+    },
+    "webhook": {
+      "url": "{{localBaseUrl}}/webhook",
+      "pattern": "^/bracket",
+      "event": "room_message",
+      "name": "Bracket Buster",
+      "authentication": "jwt"
+    },
+    "glance": [
+      {
+        "name": {
+          "value": "Brackets"
+        },
+        "queryUrl": "{{localBaseUrl}}/glance",
+        "key": "bb.glance",
+        "target": "bb.sidebar",
+        "icon": {
+          "url": "{{localBaseUrl}}/img/bracket.png",
+          "url@2x": "{{localBaseUrl}}/img/bracket.png"
+        }
+      }
+    ],
+    "webPanel": [
+      {
+        "key": "bb.sidebar",
+        "name": {
+          "value": "Brackets"
+        },
+        "location": "hipchat.sidebar.right",
+        "url": "{{localBaseUrl}}/sidebar"
+      }
+    ],
+    "dialog": [
+      {
+        "key": "bb.dialog",
+        "title": {
+          "value": "Your Bracket"
+        },
+        "url": "{{localBaseUrl}}/dialog",
+        "options": {
+          "style": "normal",
+          "primaryAction": {
+            "name": {
+              "value": "Submit Bracket"
+            },
+            "key": "bb.dialog.action",
+            "enabled": true
+          },
+          "size": {
+            "width": "95%",
+            "height": "100%"
+          }
+        }
+      }
+    ],
+    "action": [
+      {
+        "key": "bb.action",
+        "name": {
+          "value": "View Bracket"
+        },
+        "target": "bb.dialog",
+        "location": "hipchat.input.action"
+      }
+    ]
+  }
+}

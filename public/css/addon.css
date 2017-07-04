@@ -1,0 +1,91 @@
+/* Add-on styles */
+
+/* Styles for the sidebar to support the single page content approach. */
+
+.content-target {
+  display: none;
+  position: absolute;
+  top: 0;
+}
+
+/* Styles for the dialog */
+
+/*
+ *  Flex Layout Specifics
+ */
+.half-bracket {
+  display: flex;
+}
+
+.region {
+  display: flex;
+  flex-direction: row;
+}
+
+.round {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 150px;
+  list-style: none;
+  padding: 0;
+}
+
+.round .spacer {
+  flex-grow: 1;
+}
+
+.round .spacer:first-child,
+.round .spacer:last-child {
+  flex-grow: .5;
+}
+
+.round .game-spacer-left,
+.round .game-spacer-right {
+  flex-grow: 1;
+}
+
+/*
+ *  General Styles
+ */
+
+li.game {
+  padding-left: 20px;
+}
+
+li.game.winner {
+  font-weight: bold;
+}
+
+li.game span.score { /* Score */
+  float: right;
+  margin-right: 5px;
+}
+
+li.game span.seed {
+
+}
+
+li.game-top {
+  border-bottom: 1px solid #aaa; /* Line below team name */
+}
+
+li.game-spacer-left { 
+  border-right: 1px solid #aaa; /* Line to the right */
+  min-height: 40px;
+}
+
+li.game-spacer-right {
+  border-left: 1px solid #aaa; /* Line to the left */
+  min-height: 40px;
+}
+
+li.game-spacer-mid { 
+  border-right: 1px solid #aaa;
+  border-left: 1px solid #aaa;
+  min-height: 40px;
+}
+
+li.game-bottom{ 
+  border-top: 1px solid #aaa; /* Line above team name */
+}
