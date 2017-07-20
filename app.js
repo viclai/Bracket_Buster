@@ -64,6 +64,13 @@ app.use(addon.middleware());
 app.use(expiry(app, {dir: staticDir, debug: devEnv}));
 // Add an hbs helper to fingerprint static resource urls
 hbs.registerHelper('furl', function(url){ return app.locals.furl(url); });
+// Add custom hbs helpers
+hbs.registerHelper('add', function(a, b){
+  var lvalue = parseInt(a);
+  var rvalue = parseInt(b);
+  var res = lvalue + rvalue;
+  return res.toString().length === 1 ? '0' + res : res.toString();
+});
 // Mount the static resource dir
 app.use(express.static(staticDir));
 
@@ -75,7 +82,7 @@ routes(app, addon);
 
 // Boot the damn thing
 http.createServer(app).listen(port, function(){
-  console.log()
+  console.log();
   console.log('Add-on server running at '+ (addon.config.localBaseUrl()||('http://' + (os.hostname()) + ':' + port)));
   // Enables auto registration/de-registration of add-ons into a host in dev mode
   if (devEnv) addon.register();

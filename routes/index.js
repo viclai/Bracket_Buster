@@ -2,13 +2,14 @@ var request = require('request');
 var cors = require('cors');
 var uuid = require('uuid');
 var url = require('url');
-var cheerio = require('cheerio')
+var cheerio = require('cheerio');
 
 // This is the heart of your HipChat Connect add-on. For more information,
 // take a look at
 // https://developer.atlassian.com/hipchat/tutorials/getting-started-with-atlassian-connect-express-node-js
 module.exports = function (app, addon) {
   var hipchat = require('../lib/hipchat')(addon);
+  //var bracket = require('../public/js/bracket.js');
 
   // simple healthcheck
   app.get('/healthcheck', function (req, res) {
@@ -121,22 +122,37 @@ module.exports = function (app, addon) {
     addon.authenticate(),
     function (req, res) {
       /*
-       * Prints the bracket data to console.
+       * Prints the bracket data to console. This is helpful for debugging
+       * purposes.
        */
       var print_data = function(oBracketData) {
-        for (region in oBracketData) {
-          console.log(region + ':');
-          if (region == 'national') {
+        var key;
+        var region;
+        var round;
+        var p1;
+        var p2;
+        var team;
+        var attr;
+
+        for (key in oBracketData) {
+          console.log(key + ':');
+
+          if (key == 'national') {
+            region = key;
             for (round in oBracketData[region]) {
               console.log('\t' + round + ':');
               for (p1 in oBracketData[region][round]) {
                 for (p2 in oBracketData[region][round][p1]) {
-                  console.log('\t\t' + p2 + ': ' + oBracketData[region][round][p1][p2]);
+                  console.log('\t\t' + p2 + ': ' + 
+                    oBracketData[region][round][p1][p2]);
                 }
               }
               console.log('\n');
             }
-          } else {
+          } else if (key == 'state') {
+            console.log(oBracketData[key]);
+          } else { // east, midwest, south, west
+            region = key;
             for (round in oBracketData[region]) {
               console.log('\t' + round + ':');
               oBracketData[region][round].forEach(function(game) {
@@ -150,6 +166,81 @@ module.exports = function (app, addon) {
             }
           }
         }
+      };
+
+      /*
+       * Forces and changes the bracket data to be in a 'Set' state for
+       * debugging/testing purposes.
+       * @param {Object} oBracketData - The bracket data.
+       * @returns {Object} The new, modified bracket data.
+       */
+      var set_bracket_state = function(oBracketData) {
+        var new_bracket = {};
+
+        for (key in oBracketData) {
+          new_bracket[key] = oBracketData[key];
+        }
+        new_bracket['state'] = {};
+        new_bracket['state']['set'] = true;
+        return new_bracket;
+      };
+
+      /*
+       * Forces and changes the bracket data to be in a 'Available' state for
+       * debugging/testing purposes.
+       * @param {Object} oBracketData - The bracket data.
+       * @returns {Object} The new, modified bracket data.
+       */
+      var available_bracket_state = function(oBracketData) {
+        var new_bracket = {};
+        var key;
+        var team;
+        var attr;
+        var team_obj;
+        var game_obj;
+
+        for (key in oBracketData) {
+          new_bracket[key] = {};
+
+          if ('1st Round' in oBracketData[key]) {
+            new_bracket[key]['1st Round'] = []
+            oBracketData[key]['1st Round'].forEach(function(game) {
+              game_obj = {};
+
+              for (team in game) {
+                game_obj[team] = {};
+
+                for (attr in game[team]) {
+                  if (attr != 'score') // Exclude scores
+                    game_obj[team][attr] = game[team][attr];
+                }
+              }
+
+              new_bracket[key]['1st Round'].push(game_obj);
+            });
+          } else if (key != 'national')
+            new_bracket[key] = oBracketData[key];
+        }
+        new_bracket['state'] = {};
+        new_bracket['state']['available'] = true;
+        return new_bracket;
+      };
+
+      /*
+       * Forces and changes the bracket data to be in a 'Unavailable' state
+       * for debugging/testing purposes.
+       * @param {Object} oBracketData - The bracket data.
+       * @returns {Object} The new, modified bracket data.
+       */
+      var unavailable_bracket_state = function(oBracketData) {
+        var new_bracket = {};
+
+        for (key in oBracketData) {
+          new_bracket[key] = oBracketData[key];
+        }
+        new_bracket['state'] = {};
+        new_bracket['state']['unavailable'] = true;
+        return new_bracket;
       };
 
       /*
@@ -174,7 +265,7 @@ module.exports = function (app, addon) {
 
       /*
        * Abbreviates a team name.
-       * @ returns {string} abbreviated name
+       * @returns {string} abbreviated name
        */
       var abbreviate = function(sName) {
         var parts = sName.split(" ");
@@ -183,14 +274,14 @@ module.exports = function (app, addon) {
           'north carolina-wilmington' : 'UNCW'
         };
         var word_abbrs = {
-          'state'          : 'St.',
-          'saint'          : 'St.',
-          'north'          : 'N.',
-          'northern'       : 'N.',
-          'west'           : 'W.',
-          'south'          : 'S.',
-          'tennessee'      : 'Tenn.',
-          'mount'          : 'Mt.'
+          'state'          : 'St',
+          'saint'          : 'St',
+          'north'          : 'N',
+          'northern'       : 'N',
+          'west'           : 'W',
+          'south'          : 'S',
+          'tennessee'      : 'Tenn',
+          'mount'          : 'Mt'
         };
         var i;
         var lower;
@@ -293,7 +384,7 @@ module.exports = function (app, addon) {
                         
                         team_name = $(this).children('a').first();
                         team['name'] = abbreviate(team_name.text());
-                        team_score = $(this).children('a').next();//team_name.next();
+                        team_score = $(this).children('a').next();
                         if (team_score.length != 0) {
                           team['score'] = parseInt(team_score.text());
                         }
@@ -404,10 +495,12 @@ module.exports = function (app, addon) {
 
                 });
                 
-                //print_data(info);
+                //print_data(info); // DEBUG
                 if (Object.keys(info).length !== 0) {
                   view_context['bracketData'] = info;
                 }
+                view_context['bracketData'] = available_bracket_state(view_context['bracketData']); // DEBUG
+                print_data(view_context['bracketData']); // DEBUG
                 view_context['identity'] = req.identity;
                 res.render('dialog', view_context);
 
@@ -420,6 +513,8 @@ module.exports = function (app, addon) {
           } else {
 
             console.log('ERROR fetching HTML');
+            view_context['bracketData']['state'] = {};
+            view_context['bracketData']['unavailable'] = true;
 
           }
         });

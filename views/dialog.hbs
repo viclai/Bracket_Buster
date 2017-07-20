@@ -1,405 +1,855 @@
 {{!< layout}}
 
 {{#contentFor 'pageStyles'}}
-<style>
-  body {
-    font-family: sans-serif;
-    font-size: small;
-    padding: 10px;
-    line-height: 1.4em;
-  }
-</style>
+  <style>
+    body {
+      font-family: sans-serif;
+      font-size: small;
+      padding: 10px;
+      line-height: 1.4em;
+    }
+  </style>
+{{/contentFor}}
+
+{{#contentFor 'pageScripts'}}
+  $(function(){
+    $('.bb-seed-real').hide();
+    $('.bb-team-name-real').hide();
+    $('.bb-score').hide();
+
+    // http://jsfiddle.net/softvar/BtLxY/
+    $('input[type="radio"]').each(function() {
+      $(this).attr('waschecked', false);
+    });
+
+    $('input[name="bb-option"]').change(function() {
+      var op = $(this).val();
+
+      if (op == 'picks_op') {
+        // Show radio button and team-pick with seed
+        $('.bb-seed').show();
+        $('.bb-team-name').show();
+        $('.bb-seed-real').hide();
+        $('.bb-team-name-real').hide();
+        $('.bb-team-pick').show();
+        $('.bb-score').hide();
+
+      } else if (op == 'scores_op') {
+        // Show score and real team with seed
+        $('.bb-seed').hide();
+        $('.bb-team-name').hide();
+        $('.bb-seed-real').show();
+        $('.bb-team-name-real').show();
+        $('.bb-team-pick').hide();
+        $('.bb-score').show();
+      }
+    });
+
+    $('input[type="radio"].bb-team-pick').click(function() {
+      var name = $(this).attr('name');
+      var hyphenIn = name.indexOf('-');
+      var game = parseInt(name.slice(hyphenIn + 1, hyphenIn + 3));
+      var brack = Math.floor(game / 2);
+      var isTop = (game % 2) == 0;
+      var round = parseInt(name[hyphenIn - 1]) + 1;
+      var brackName;
+      var selector;
+      var other = $('[name=\'' + name + '\']').not(this).first();
+      var seed;
+      var next_round_is_filled = (round - 1) != 1
+                                  && $(other).is(':visible');
+      var curBrack;
+      var curBrackName;
+      var curSelector;
+      var curSeed;
+      var curGame;
+      var i;
+
+      if (brack.toString().length == 1)
+        brack = '0' + brack;
+      brackName = 'round' + round + '-' + brack;
+      selector = '[name=\'' + brackName + '\']';
+
+      if ($(this).attr('waschecked') == "true") {
+        $(this).prop('checked', false);
+        $(this).attr('waschecked', false);
+
+        // Erase team in this bracket
+        curBrack = brack;
+        curGame = game;
+        for (i = round; i <= 6; i++) {
+          if (curBrack.toString().length == 1)
+            curBrack = '0' + curBrack;
+          curBrackName = 'round' + i + '-' + curBrack;
+          curSelector = '[name=\'' + curBrackName + '\']';
+
+          if (curGame % 2 == 0)
+            curSelector += ":first";
+          else
+            curSelector += ":last";
+          if ($(this).siblings('.bb-team-name').first().html() !=
+              $(curSelector).siblings('.bb-team-name').first().html())
+              break;
+
+          curSeed = $(curSelector).siblings('.bb-seed').first();
+          curSeed.html('');
+          $(curSelector).val();
+          $(curSelector).siblings('.bb-team-name').first().html('&nbsp;');
+          $(curSelector).hide();
+          $(curSelector).attr('waschecked', false);
+          $(curSelector).prop('checked', false);
+
+          curGame = parseInt(curBrack);
+          curBrack = Math.floor(curGame / 2);
+        }  
+
+      } else {
+        $(this).attr('waschecked', true);
+
+        // Advance team to next bracket
+        if (isTop)
+          selector += ':first';
+        else
+          selector += ':last';
+        seed = $(selector).siblings('.bb-seed').first();
+        seed.html($(this).siblings('.bb-seed').first().html());
+        $(selector).val($(this).val());
+        $(selector).siblings('.bb-team-name').first().html($(this).val());
+        $(selector).show();
+
+        if (next_round_is_filled) {
+          $(selector).prop('checked', false);
+          $(selector).attr('waschecked', false);
+
+          round++;
+          curGame = parseInt(brack);
+          curBrack = Math.floor(parseInt(brack) / 2);
+          for (i = round; i <= 6; i++) {
+            if (curBrack.toString().length == 1)
+              curBrack = '0' + curBrack;
+            curBrackName = 'round' + i + '-' + curBrack;
+            curSelector = '[name=\'' + curBrackName + '\']';
+
+            if (curGame % 2 == 0)
+              curSelector += ":first";
+            else
+              curSelector += ":last";
+            if ($(other).siblings('.bb-team-name').first().html() !=
+                $(curSelector).siblings('.bb-team-name').first().html())
+              break;
+
+            curSeed = $(curSelector).siblings('.bb-seed').first();
+            curSeed.html('');
+            $(curSelector).siblings('.bb-team-name').first().html('&nbsp;');
+            $(curSelector).val('');
+            $(curSelector).hide();
+            $(curSelector).attr('waschecked', false);
+            $(curSelector).prop('checked', false);
+
+            curGame = parseInt(curBrack);
+            curBrack = Math.floor(curGame / 2);
+          }
+        }
+
+      }
+
+      $('input[name=\'' + name + '\']').not(this).attr('waschecked', false);
+    });
+  });
 {{/contentFor}}
 
 <!-- The dialog has a primary action, declared in the descriptor atlassian-connect.json -->
 <!-- It is implemented in the js/addon.js file imported in the layout -->
 
 <a href="" target="_blank">Open in New Tab</a>
-<table style="width: 100%; margin-left: auto; margin-right: auto;">
-  <tr>
-    <td style="width: 50%;">
-      <table align="left">
-        <tr class="half-bracket">
-          <td class="region"> <!-- East -->
-            <ul class="round" style="margin-top: 10px;">
-              <li class="spacer">&nbsp;</li>
+{{#if bracketData.state.unavailable}}
+  {{!-- Bracket is either not ready yet or there is an error. --}}
+  The bracket is not available at this time.
+{{else}}
+  <div style="position: fixed; width: 100%; text-align: center; background-color: #edf0f4;">
+    <input type="radio" name="bb-option" value="picks_op" checked /> My Picks
+    <input type="radio" name="bb-option" value="scores_op" /> Results
+  </div>
+  <table style="width: 100%; margin-left: auto; margin-right: auto;">
+    <tr>
+      {{#with bracketData.east}}
+        <td style="width: 50%;">
+          <table align="left">
+            <tr class="half-bracket">
+              <td class="region"> <!-- East -->
+                <ul class="round" style="margin-top: 10px;">
+                  <li class="spacer">&nbsp;</li>
 
-              {{#each bracketData.east.[1st Round]}}
-                <li class="game game-top">
-                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
-                </li>
-                <li class="game game-spacer-left">&nbsp;</li>
-                <li class="game game-bottom">
-                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
-                </li>
+                  {{#each [1st Round]}}
+                    <li class="game game-top">
+                      <span class="bb-seed-real">{{team1.seed}}</span>
+                      <span class="bb-seed">{{team1.seed}}</span>
 
-                <li class="spacer">&nbsp;</li>
-              {{/each}}
-            </ul>
+                      <span class="bb-team-name-real">{{team1.name}}</span>
+                      <span class="bb-team-name">{{team1.name}}</span>
 
-            <ul class="round">
-              <li class="spacer">&nbsp;</li>
+                      <span class="bb-score">{{team1.score}}</span>
+                      <input type="radio" name="round1-{{@index}}" class="bb-team-pick" value="{{team1.name}}" />
+                    </li>
+                    <li class="game game-spacer-left">&nbsp;</li>
+                    <li class="game game-bottom">
+                      <span class="bb-seed-real">{{team2.seed}}</span>
+                      <span class="bb-seed">{{team2.seed}}</span>
 
-              {{#each bracketData.east.[2nd Round]}}
-                <li class="game game-top">
-                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
-                </li>
-                <li class="game game-spacer-left">&nbsp;</li>
-                <li class="game game-bottom">
-                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
-                </li>
+                      <span class="bb-team-name-real">{{team2.name}}</span>
+                      <span class="bb-team-name">{{team2.name}}</span>
 
-                <li class="spacer">&nbsp;</li>
-              {{/each}}
-            </ul>
+                      <span class="bb-score">{{team2.score}}</span>
+                      <input type="radio" name="round1-{{@index}}" class="bb-team-pick" value="{{team2.name}}" />
+                    </li>
 
-            <ul class="round">
-              <li class="spacer">&nbsp;</li>
+                    <li class="spacer">&nbsp;</li>
+                  {{/each}}
+                </ul>
 
-              {{#each bracketData.east.[Sweet 16]}}
-                <li class="game game-top">
-                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
-                </li>
-                <li class="game game-spacer-left">&nbsp;</li>
-                <li class="game game-bottom">
-                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
-                </li>
+                <ul class="round">
+                  <li class="spacer">&nbsp;</li>
 
-                <li class="spacer">&nbsp;</li>
-              {{/each}}
-            </ul>
+                  {{#each [2nd Round]}}
+                    <li class="game game-top">
+                      <span class="bb-seed-real">{{team1.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
 
-            <ul class="round">
-              <li class="spacer">&nbsp;</li>
+                      <span class="bb-team-name-real">{{team1.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
 
-              {{#each bracketData.east.[Elite 8]}}
-                <li class="game game-top">
-                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
-                </li>
-                <li class="game game-spacer-left">&nbsp;</li>
-                <li class="game game-bottom">
-                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
-                </li>
+                      <span class="bb-score">{{team1.score}}</span>
+                      <input type="radio" name="round2-{{@index}}" class="bb-team-pick" hidden />
+                    </li>
+                    <li class="game game-spacer-left">&nbsp;</li>
+                    <li class="game game-bottom">
+                      <span class="bb-seed-real">{{team2.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
 
-                <li class="spacer">&nbsp;</li>
-              {{/each}}
-            </ul>
-          </td>
-        </tr>
-      </table>
-    </td>
+                      <span class="bb-team-name-real">{{team2.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
 
-    <td style="width: 50%;">
-      <table align="right">
-        <tr class="half-bracket">
-          <td class="region"> <!-- Midwest -->
-            <ul class="round">
-              <li class="spacer">&nbsp;</li>
+                      <span class="bb-score">{{team2.score}}</span>
+                      <input type="radio" name="round2-{{@index}}" class="bb-team-pick" hidden />
+                    </li>
 
-              {{#each bracketData.midwest.[Elite 8]}}
-                <li class="game game-top">
-                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
-                </li>
-                <li class="game game-spacer-right">&nbsp;</li>
-                <li class="game game-bottom">
-                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
-                </li>
+                    <li class="spacer">&nbsp;</li>
+                  {{/each}}
+                </ul>
 
-                <li class="spacer">&nbsp;</li>
-              {{/each}}
-            </ul>
+                <ul class="round">
+                  <li class="spacer">&nbsp;</li>
 
-            <ul class="round">
-              <li class="spacer">&nbsp;</li>
+                  {{#each [Sweet 16]}}
+                    <li class="game game-top">
+                      <span class="bb-seed-real">{{team1.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
 
-              {{#each bracketData.midwest.[Sweet 16]}}
-                <li class="game game-top">
-                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
-                </li>
-                <li class="game game-spacer-right">&nbsp;</li>
-                <li class="game game-bottom">
-                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
-                </li>
+                      <span class="bb-team-name-real">{{team1.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
 
-                <li class="spacer">&nbsp;</li>
-              {{/each}}
-            </ul>
+                      <span class="bb-score">{{team1.score}}</span>
+                      <input type="radio" name="round3-{{@index}}" class="bb-team-pick" hidden />
+                    </li>
+                    <li class="game game-spacer-left">&nbsp;</li>
+                    <li class="game game-bottom">
+                      <span class="bb-seed-real">{{team2.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
 
-            <ul class="round">
-              <li class="spacer">&nbsp;</li>
+                      <span class="bb-team-name-real">{{team2.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
 
-              {{#each bracketData.midwest.[2nd Round]}}
-                <li class="game game-top">
-                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
-                </li>
-                <li class="game game-spacer-right">&nbsp;</li>
-                <li class="game game-bottom">
-                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
-                </li>
+                      <span class="bb-score">{{team2.score}}</span>
+                      <input type="radio" name="round3-{{@index}}" class="bb-team-pick" hidden />
+                    </li>
 
-                <li class="spacer">&nbsp;</li>
-              {{/each}}
-            </ul>
-            
-            <ul class="round">
-              <li class="spacer">&nbsp;</li>
+                    <li class="spacer">&nbsp;</li>
+                  {{/each}}
+                </ul>
 
-              {{#each bracketData.midwest.[1st Round]}}
-                <li class="game game-top">
-                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
-                </li>
-                <li class="game game-spacer-right">&nbsp;</li>
-                <li class="game game-bottom">
-                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
-                </li>
+                <ul class="round">
+                  <li class="spacer">&nbsp;</li>
 
-                <li class="spacer">&nbsp;</li>
-              {{/each}}
-            </ul>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>
+                  {{#each [Elite 8]}}
+                    <li class="game game-top">
+                      <span class="bb-seed-real">{{team1.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
 
-<table style="width: 100%; margin-left: auto; margin-right: auto;">
-  <tr>
-    <td style="width: 33%;">
-      <table align="right">
-        <tr>
-          <td class="region">
-            <ul class="round">
-              <li class="spacer">&nbsp;</li>
+                      <span class="bb-team-name-real">{{team1.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
 
-              <li class="game game-top">
-                <span class="seed">
-                  {{bracketData.national.[Final Four].east.seed}}
-                </span> {{bracketData.national.[Final Four].east.name}} <span
-                  class="score">{{bracketData.national.[Final Four].east.score}}
-                </span>
-              </li>
-              <li class="game game-spacer-left">&nbsp;</li>
-              <li class="game game-bottom">
-                <span class="seed">
-                  {{bracketData.national.[Final Four].west.seed}}
-                </span> {{bracketData.national.[Final Four].west.name}} <span
-                  class="score">{{bracketData.national.[Final Four].west.score}}
-                </span>
-              </li>
+                      <span class="bb-score">{{team1.score}}</span>
+                      <input type="radio" name="round4-{{@index}}" class="bb-team-pick" hidden />
+                    </li>
+                    <li class="game game-spacer-left">&nbsp;</li>
+                    <li class="game game-bottom">
+                      <span class="bb-seed-real">{{team2.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
 
-              <li class="spacer">&nbsp;</li>
-            </ul>
-          </td>
-        </tr>
-      </table>
-    </td>
+                      <span class="bb-team-name-real">{{team2.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
 
-    <td style="width: 33%;">
-      <table align="center">
-        <tr>
-          <td class="region"> <!-- Championship -->
-            <ul class="round">
-              <li class="spacer">&nbsp;</li>
+                      <span class="bb-score">{{team2.score}}</span>
+                      <input type="radio" name="round4-{{@index}}" class="bb-team-pick" hidden />
+                    </li>
 
-              <li class="game game-top">
-                <span class="seed">
-                  {{bracketData.national.Championship.team1.seed}}
-                </span> {{bracketData.national.Championship.team1.name}} <span
-                  class="score">{{bracketData.national.Championship.team1.score}}
-                </span>
-              </li>
-              <li class="game game-spacer-mid">&nbsp;</li>
-              <li class="game game-bottom">
-                <span class="seed">
-                  {{bracketData.national.Championship.team2.seed}}
-                </span> {{bracketData.national.Championship.team2.name}} <span
-                  class="score">{{bracketData.national.Championship.team2.score}}
-                </span>
-              </li>
+                    <li class="spacer">&nbsp;</li>
+                  {{/each}}
+                </ul>
+              </td>
+            </tr>
+          </table>
+        </td>
+      {{/with}}
 
-              <li class="spacer">&nbsp;</li>
-            </ul>
-          </td>
-        </tr>
-      </table>
-    </td>
+      {{#with bracketData.midwest}}
+        <td style="width: 50%;">
+          <table align="right">
+            <tr class="half-bracket">
+              <td class="region"> <!-- Midwest -->
+                <ul class="round">
+                  <li class="spacer">&nbsp;</li>
 
-    <td style="width: 33%;">
-      <table align="left">
-        <tr>
-          <td class="region">
-            <ul class="round">
-              <li class="spacer">&nbsp;</li>
+                  {{#each [Elite 8]}}
+                    <li class="game game-top">
+                      <span class="bb-seed-real">{{team1.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
 
-              <li class="game game-top">
-                <span class="seed">
-                  {{bracketData.national.[Final Four].midwest.seed}}
-                </span> {{bracketData.national.[Final Four].midwest.name}} <span
-                  class="score">{{bracketData.national.[Final Four].midwest.score}}
-                </span>
-              </li>
-              <li class="game game-spacer-right">&nbsp;</li>
-              <li class="game game-bottom">
-                <span class="seed">
-                  {{bracketData.national.[Final Four].south.seed}}
-                </span> {{bracketData.national.[Final Four].south.name}} <span
-                  class="score">{{bracketData.national.[Final Four].south.score}}
-                </span>
-              </li>
+                      <span class="bb-team-name-real">{{team1.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
 
-              <li class="spacer">&nbsp;</li>
-            </ul>
-          </td>
-        </tr>
-      </table>
-    </td>
-</table>
+                      <span class="bb-score">{{team1.score}}</span>
+                      <input type="radio" name="round4-{{add @index 2}}" class="bb-team-pick" hidden />
+                    </li>
+                    <li class="game game-spacer-right">&nbsp;</li>
+                    <li class="game game-bottom">
+                      <span class="bb-seed-real">{{team2.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
 
-<table style="width: 100%; margin-left: auto; margin-right: auto;">
-  <tr>
-    <td style="width: 50%;">
-      <table align="left">
-        <tr class="half-bracket">
-          <td class="region"> <!-- West -->
-            <ul class="round">
-              <li class="spacer">&nbsp;</li>
+                      <span class="bb-team-name-real">{{team2.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
 
-              {{#each bracketData.west.[1st Round]}}
-                <li class="game game-top">
-                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
-                </li>
-                <li class="game game-spacer-left">&nbsp;</li>
-                <li class="game game-bottom">
-                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
-                </li>
+                      <span class="bb-score">{{team2.score}}</span>
+                      <input type="radio" name="round4-{{add @index 2}}" class="bb-team-pick" hidden />
+                    </li>
 
-                <li class="spacer">&nbsp;</li>
-              {{/each}}
-            </ul>
+                    <li class="spacer">&nbsp;</li>
+                  {{/each}}
+                </ul>
 
-            <ul class="round">
-              <li class="spacer">&nbsp;</li>
+                <ul class="round">
+                  <li class="spacer">&nbsp;</li>
 
-              {{#each bracketData.west.[2nd Round]}}
-                <li class="game game-top">
-                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
-                </li>
-                <li class="game game-spacer-left">&nbsp;</li>
-                <li class="game game-bottom">
-                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
-                </li>
+                  {{#each [Sweet 16]}}
+                    <li class="game game-top">
+                      <span class="bb-seed-real">{{team1.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
 
-                <li class="spacer">&nbsp;</li>
-              {{/each}}
-            </ul>
+                      <span class="bb-team-name-real">{{team1.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
 
-            <ul class="round">
-              <li class="spacer">&nbsp;</li>
+                      <span class="bb-score">{{team1.score}}</span>
+                      <input type="radio" name="round4-{{add @index 4}}" class="bb-team-pick" hidden />
+                    </li>
+                    <li class="game game-spacer-right">&nbsp;</li>
+                    <li class="game game-bottom">
+                      <span class="bb-seed-real">{{team2.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
 
-              {{#each bracketData.west.[Sweet 16]}}
-                <li class="game game-top">
-                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
-                </li>
-                <li class="game game-spacer-left">&nbsp;</li>
-                <li class="game game-bottom">
-                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
-                </li>
+                      <span class="bb-team-name-real">{{team2.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
 
-                <li class="spacer">&nbsp;</li>
-              {{/each}}
-            </ul>
-            
-            <ul class="round">
-              <li class="spacer">&nbsp;</li>
+                      <span class="bb-score">{{team2.score}}</span>
+                      <input type="radio" name="round4-{{add @index 4}}" class="bb-team-pick" hidden />
+                    </li>
 
-              {{#each bracketData.west.[Elite 8]}}
-                <li class="game game-top">
-                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
-                </li>
-                <li class="game game-spacer-left">&nbsp;</li>
-                <li class="game game-bottom">
-                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
-                </li>
+                    <li class="spacer">&nbsp;</li>
+                  {{/each}}
+                </ul>
 
-                <li class="spacer">&nbsp;</li>
-              {{/each}}
-            </ul>
-          </td>
-        </tr>
-      </table>
-    </td>
+                <ul class="round">
+                  <li class="spacer">&nbsp;</li>
 
-    <td style="width: 50%;">
-      <table align="right">
-        <tr class="half-bracket">
-          <td class="region"> <!-- South -->
-            <ul class="round">
-              <li class="spacer">&nbsp;</li>
+                  {{#each [2nd Round]}}
+                    <li class="game game-top">
+                      <span class="bb-seed-real">{{team1.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
 
-              {{#each bracketData.south.[Elite 8]}}
-                <li class="game game-top">
-                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
-                </li>
-                <li class="game game-spacer-right">&nbsp;</li>
-                <li class="game game-bottom">
-                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
-                </li>
+                      <span class="bb-team-name-real">{{team1.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
 
-                <li class="spacer">&nbsp;</li>
-              {{/each}}
-            </ul>
+                      <span class="bb-score">{{team1.score}}</span>
+                      <input type="radio" name="round4-{{add @index 8}}" class="bb-team-pick" hidden />
+                    </li>
+                    <li class="game game-spacer-right">&nbsp;</li>
+                    <li class="game game-bottom">
+                      <span class="bb-seed-real">{{team2.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
 
-            <ul class="round">
-              <li class="spacer">&nbsp;</li>
+                      <span class="bb-team-name-real">{{team2.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
 
-              {{#each bracketData.south.[Sweet 16]}}
-                <li class="game game-top">
-                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
-                </li>
-                <li class="game game-spacer-right">&nbsp;</li>
-                <li class="game game-bottom">
-                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
-                </li>
+                      <span class="bb-score">{{team2.score}}</span>
+                      <input type="radio" name="round4-{{add @index 8}}" class="bb-team-pick" hidden />
+                    </li>
 
-                <li class="spacer">&nbsp;</li>
-              {{/each}}
-            </ul>
+                    <li class="spacer">&nbsp;</li>
+                  {{/each}}
+                </ul>
+                
+                <ul class="round">
+                  <li class="spacer">&nbsp;</li>
 
-            <ul class="round">
-              <li class="spacer">&nbsp;</li>
+                  {{#each [1st Round]}}
+                    <li class="game game-top">
+                      <span class="bb-seed-real">{{team1.seed}}</span>
+                      <span class="bb-seed">{{team1.seed}}</span>
 
-              {{#each bracketData.south.[2nd Round]}}
-                <li class="game game-top">
-                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
-                </li>
-                <li class="game game-spacer-right">&nbsp;</li>
-                <li class="game game-bottom">
-                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
-                </li>
+                      <span class="bb-team-name-real">{{team1.name}}</span>
+                      <span class="bb-team-name">{{team1.name}}</span>
 
-                <li class="spacer">&nbsp;</li>
-              {{/each}}
-            </ul>
-            
-            <ul class="round">
-              <li class="spacer">&nbsp;</li>
+                      <span class="bb-score">{{team1.score}}</span>
+                      <input type="radio" name="round4-{{add @index 16}}"
+                        class="bb-team-pick" value="{{team1.name}}" />
+                    </li>
+                    <li class="game game-spacer-right">&nbsp;</li>
+                    <li class="game game-bottom">
+                      <span class="bb-seed">{{team2.seed}}</span>
+                      <span class="bb-seed">{{team2.seed}}</span>
 
-              {{#each bracketData.south.[1st Round]}}
-                <li class="game game-top">
-                  <span class="seed">{{team1.seed}}</span> {{team1.name}} <span class="score">{{team1.score}}</span>
-                </li>
-                <li class="game game-spacer-right">&nbsp;</li>
-                <li class="game game-bottom">
-                  <span class="seed">{{team2.seed}}</span> {{team2.name}} <span class="score">{{team2.score}}</span>
-                </li>
+                      <span class="bb-team-name-real">{{team2.name}}</span>
+                      <span class="bb-team-name">{{team2.name}}</span>
 
-                <li class="spacer">&nbsp;</li>
-              {{/each}}
-            </ul>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>
+                      <span class="bb-score">{{team2.score}}</span>
+                      <input type="radio" name="round4-{{add @index 16}}"
+                        class="bb-team-pick" value="{{team2.name}}" />
+                    </li>
+
+                    <li class="spacer">&nbsp;</li>
+                  {{/each}}
+                </ul>
+              </td>
+            </tr>
+          </table>
+        </td>
+      {{/with}}
+    </tr>
+  </table>
+
+  {{#with bracketData.national}}
+    <table style="width: 100%; margin-left: auto; margin-right: auto;">
+      <tr>
+        <td style="width: 33%;">
+          <table align="right">
+            <tr>
+              <td class="region">
+                <ul class="round">
+                  <li class="spacer">&nbsp;</li>
+
+                  <li class="game game-top">
+                    <span class="bb-seed-real">
+                      {{[Final Four].east.seed}}
+                    </span>
+                    <span class="bb-seed">&nbsp;</span>
+
+                    <span class="bb-team-name-real">
+                      {{[Final Four].east.name}}
+                    </span>
+                    <span class="bb-team-name">&nbsp;</span>
+
+                    <span class="bb-score">
+                      {{[Final Four].east.score}}
+                    </span>
+                    <input type="radio" name="round5-{{add @index}}" class="bb-team-pick" hidden />
+                  </li>
+                  <li class="game game-spacer-left">&nbsp;</li>
+                  <li class="game game-bottom">
+                    <span class="bb-seed-real">
+                      {{[Final Four].west.seed}}
+                    </span>
+                    <span class="bb-seed">&nbsp;</span>
+
+                    <span class="bb-team-name-real">
+                      {{[Final Four].west.name}}
+                    </span>
+                    <span class="bb-team-name">&nbsp;</span>
+
+                    <span class="bb-score">
+                      {{[Final Four].west.score}}
+                    </span>
+                    <input type="radio" name="round5-{{add @index}}" class="bb-team-pick" hidden />
+                  </li>
+
+                  <li class="spacer">&nbsp;</li>
+                </ul>
+              </td>
+            </tr>
+          </table>
+        </td>
+
+        <td style="width: 33%;">
+          <table align="center">
+            <tr>
+              <td class="region"> <!-- Championship -->
+                <ul class="round">
+                  <li class="spacer">&nbsp;</li>
+
+                  <li class="game game-top">
+                    <span class="bb-seed-real">
+                      {{Championship.team1.seed}}
+                    </span>
+                    <span class="bb-seed">&nbsp;</span>
+
+                    <span class="bb-team-name-real">
+                      {{Championship.team1.name}}
+                    </span>
+                    <span class="bb-team-name">&nbsp;</span>
+
+                    <span class="bb-score">
+                      {{Championship.team1.score}}
+                    </span>
+                    <input type="radio" name="round6-{{add @index}}" class="bb-team-pick" hidden />
+                  </li>
+                  <li class="game game-spacer-mid">&nbsp;</li>
+                  <li class="game game-bottom">
+                    <span class="bb-seed-real">
+                      {{Championship.team2.seed}}
+                    </span>
+                    <span class="bb-seed">&nbsp;</span>
+
+                    <span class="bb-team-name-real">
+                      {{Championship.team2.name}}
+                    </span>
+                    <span class="bb-team-name">&nbsp;</span>
+
+                    <span class="bb-score">
+                      {{Championship.team2.score}}
+                    </span>
+                    <input type="radio" name="round6-{{add @index}}" class="bb-team-pick" hidden />
+                  </li>
+
+                  <li class="spacer">&nbsp;</li>
+                </ul>
+              </td>
+            </tr>
+          </table>
+        </td>
+
+        <td style="width: 33%;">
+          <table align="left">
+            <tr>
+              <td class="region">
+                <ul class="round">
+                  <li class="spacer">&nbsp;</li>
+
+                  <li class="game game-top">
+                    <span class="bb-seed-real">
+                      {{[Final Four].midwest.seed}}
+                    </span>
+                    <span class="bb-seed">&nbsp;</span>
+
+                    <span class="bb-team-name-real">
+                      {{[Final Four].midwest.name}}
+                    </span>
+                    <span class="bb-team-name">&nbsp;</span>
+
+                    <span class="bb-score">
+                      {{[Final Four].midwest.score}}
+                    </span>
+                    <input type="radio" name="round5-{{add @index 1}}" class="bb-team-pick" hidden />
+                  </li>
+                  <li class="game game-spacer-right">&nbsp;</li>
+                  <li class="game game-bottom">
+                    <span class="bb-seed-real">
+                      {{[Final Four].south.seed}}
+                    </span>
+                    <span class="bb-seed">&nbsp;</span>
+
+                    <span class="bb-team-name-real">
+                      {{[Final Four].south.name}}
+                    </span>
+                    <span class="bb-team-name">&nbsp;</span>
+
+                    <span class="bb-score">
+                      {{[Final Four].south.score}}
+                    </span>
+                    <input type="radio" name="round5-{{add @index 1}}" class="bb-team-pick" hidden />
+                  </li>
+
+                  <li class="spacer">&nbsp;</li>
+                </ul>
+              </td>
+            </tr>
+          </table>
+        </td>
+    </table>
+  {{/with}}
+
+  <table style="width: 100%; margin-left: auto; margin-right: auto;">
+    <tr>
+      {{#with bracketData.west}}
+        <td style="width: 50%;">
+          <table align="left">
+            <tr class="half-bracket">
+              <td class="region"> <!-- West -->
+                <ul class="round">
+                  <li class="spacer">&nbsp;</li>
+
+                  {{#each [1st Round]}}
+                    <li class="game game-top">
+                      <span class="bb-seed-real">{{team1.seed}}</span>
+                      <span class="bb-seed">{{team1.seed}}</span>
+
+                      <span class="bb-team-name-real">{{team1.name}}</span>
+                      <span class="bb-team-name">{{team1.name}}</span>
+
+                      <span class="bb-score">{{team1.score}}</span>
+                      <input type="radio" name="round1-{{add @index 8}}"
+                        class="bb-team-pick" value="{{team1.name}}" />
+                    </li>
+                    <li class="game game-spacer-left">&nbsp;</li>
+                    <li class="game game-bottom">
+                      <span class="bb-seed-real">{{team2.seed}}</span>
+                      <span class="bb-seed">{{team2.seed}}</span>
+
+                      <span class="bb-team-name-real">{{team2.name}}</span>
+                      <span class="bb-team-name">{{team2.name}}</span>
+
+                      <span class="bb-score">{{team2.score}}</span>
+                      <input type="radio" name="round1-{{add @index 8}}"
+                        class="bb-team-pick" value="{{team2.name}}" />
+                    </li>
+
+                    <li class="spacer">&nbsp;</li>
+                  {{/each}}
+                </ul>
+
+                <ul class="round">
+                  <li class="spacer">&nbsp;</li>
+
+                  {{#each [2nd Round]}}
+                    <li class="game game-top">
+                      <span class="bb-seed-real">{{team1.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
+
+                      <span class="bb-team-name-real">{{team1.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
+
+                      <span class="bb-score">{{team1.score}}</span>
+                      <input type="radio" name="round2-{{add @index 4}}" class="bb-team-pick" hidden />
+                    </li>
+                    <li class="game game-spacer-left">&nbsp;</li>
+                    <li class="game game-bottom">
+                      <span class="bb-seed-real">{{team2.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
+
+                      <span class="bb-team-name-real">{{team2.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
+
+                      <span class="bb-score">{{team2.score}}</span>
+                      <input type="radio" name="round2-{{add @index 4}}" class="bb-team-pick" hidden />
+                    </li>
+
+                    <li class="spacer">&nbsp;</li>
+                  {{/each}}
+                </ul>
+
+                <ul class="round">
+                  <li class="spacer">&nbsp;</li>
+
+                  {{#each [Sweet 16]}}
+                    <li class="game game-top">
+                      <span class="bb-seed-real">{{team1.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
+
+                      <span class="bb-team-name-real">{{team1.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
+
+                      <span class="bb-score">{{team1.score}}</span>
+                      <input type="radio" name="round3-{{add @index 2}}" class="bb-team-pick" hidden />
+                    </li>
+                    <li class="game game-spacer-left">&nbsp;</li>
+                    <li class="game game-bottom">
+                      <span class="bb-seed-real">{{team2.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
+
+                      <span class="bb-team-name-real">{{team2.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
+
+                      <span class="bb-score">{{team2.score}}</span>
+                      <input type="radio" name="round3-{{add @index 2}}" class="bb-team-pick" hidden />
+                    </li>
+
+                    <li class="spacer">&nbsp;</li>
+                  {{/each}}
+                </ul>
+                
+                <ul class="round">
+                  <li class="spacer">&nbsp;</li>
+
+                  {{#each [Elite 8]}}
+                    <li class="game game-top">
+                      <span class="bb-seed-real">{{team1.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
+
+                      <span class="bb-team-name-real">{{team1.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
+
+                      <span class="bb-score">{{team1.score}}</span>
+                      <input type="radio" name="round4-{{add @index 1}}" class="bb-team-pick" hidden />
+                    </li>
+                    <li class="game game-spacer-left">&nbsp;</li>
+                    <li class="game game-bottom">
+                      <span class="bb-seed-real">{{team2.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
+
+                      <span class="bb-team-name-real">{{team2.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
+
+                      <span class="bb-score">{{team2.score}}</span>
+                      <input type="radio" name="round4-{{add @index 1}}" class="bb-team-pick" hidden />
+                    </li>
+
+                    <li class="spacer">&nbsp;</li>
+                  {{/each}}
+                </ul>
+              </td>
+            </tr>
+          </table>
+        </td>
+      {{/with}}
+
+      {{#with bracketData.south}}
+        <td style="width: 50%;">
+          <table align="right">
+            <tr class="half-bracket">
+              <td class="region"> <!-- South -->
+                <ul class="round">
+                  <li class="spacer">&nbsp;</li>
+
+                  {{#each [Elite 8]}}
+                    <li class="game game-top">
+                      <span class="bb-seed-real">{{team1.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
+
+                      <span class="bb-team-name-real">{{team1.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
+
+                      <span class="bb-score">{{team1.score}}</span>
+                      <input type="radio" name="round4-{{add @index 3}}" class="bb-team-pick" hidden />
+                    </li>
+                    <li class="game game-spacer-right">&nbsp;</li>
+                    <li class="game game-bottom">
+                      <span class="bb-seed-real>{{team2.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
+
+                      <span class="bb-team-name-real">{{team2.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
+
+                      <span class="bb-score">{{team2.score}}</span>
+                      <input type="radio" name="round4-{{add @index 3}}" class="bb-team-pick" hidden />
+                    </li>
+
+                    <li class="spacer">&nbsp;</li>
+                  {{/each}}
+                </ul>
+
+                <ul class="round">
+                  <li class="spacer">&nbsp;</li>
+
+                  {{#each [Sweet 16]}}
+                    <li class="game game-top">
+                      <span class="bb-seed-real">{{team1.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
+
+                      <span class="bb-team-name-real">{{team1.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
+
+                      <span class="bb-score">{{team1.score}}</span>
+                      <input type="radio" name="round3-{{add @index 6}}" class="bb-team-pick" hidden />
+                    </li>
+                    <li class="game game-spacer-right">&nbsp;</li>
+                    <li class="game game-bottom">
+                      <span class="bb-seed-real">{{team2.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
+
+                      <span class="bb-team-name-real">{{team2.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
+
+                      <span class="bb-score">{{team2.score}}</span>
+                      <input type="radio" name="round3-{{add @index 6}}" class="bb-team-pick" hidden />
+                    </li>
+
+                    <li class="spacer">&nbsp;</li>
+                  {{/each}}
+                </ul>
+
+                <ul class="round">
+                  <li class="spacer">&nbsp;</li>
+
+                  {{#each [2nd Round]}}
+                    <li class="game game-top">
+                      <span class="bb-seed-real">{{team1.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
+
+                      <span class="bb-team-name-real">{{team1.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
+
+                      <span class="bb-score">{{team1.score}}</span>
+                      <input type="radio" name="round2-{{add @index 12}}" class="bb-team-pick" hidden />
+                    </li>
+                    <li class="game game-spacer-right">&nbsp;</li>
+                    <li class="game game-bottom">
+                      <span class="bb-seed-real">{{team2.seed}}</span>
+                      <span class="bb-seed">&nbsp;</span>
+
+                      <span class="bb-team-name-real">{{team2.name}}</span>
+                      <span class="bb-team-name">&nbsp;</span>
+
+                      <span class="bb-score">{{team2.score}}</span>
+                      <input type="radio" name="round2-{{add @index 12}}" class="bb-team-pick" hidden />
+                    </li>
+
+                    <li class="spacer">&nbsp;</li>
+                  {{/each}}
+                </ul>
+                
+                <ul class="round">
+                  <li class="spacer">&nbsp;</li>
+
+                  {{#each [1st Round]}}
+                    <li class="game game-top">
+                      <span class="bb-seed-real">{{team1.seed}}</span>
+                      <span class="bb-seed">{{team1.seed}}</span>
+
+                      <span class="bb-team-name-real">{{team1.name}}</span>
+                      <span class="bb-team-name">{{team1.name}}</span>
+
+                      <span class="bb-score">{{team1.score}}</span>
+                      <input type="radio" name="round1-{{add @index 24}}"
+                        class="bb-team-pick" value="{{team1.name}}" />
+                    </li>
+                    <li class="game game-spacer-right">&nbsp;</li>
+                    <li class="game game-bottom">
+                      <span class="bb-seed-real">{{team2.seed}}</span>
+                      <span class="bb-seed">{{team2.seed}}</span>
+
+                      <span class="bb-team-name-real">{{team2.name}}</span>
+                      <span class="bb-team-name">{{team2.name}}</span>
+
+                      <span class="bb-score">{{team2.score}}</span>
+                      <input type="radio" name="round1-{{add @index 24}}"
+                        class="bb-team-pick" value="{{team2.name}}" />
+                    </li>
+
+                    <li class="spacer">&nbsp;</li>
+                  {{/each}}
+                </ul>
+              </td>
+            </tr>
+          </table>
+        </td>
+      {{/with}}
+    </tr>
+  </table>
+{{/if}}

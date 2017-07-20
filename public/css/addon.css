@@ -57,12 +57,16 @@ li.game.winner {
   font-weight: bold;
 }
 
-li.game span.score { /* Score */
+li.game span.bb-score { /* Score */
   float: right;
   margin-right: 5px;
 }
 
-li.game span.seed {
+li.game input.bb-team-pick {
+  float: right;
+}
+
+li.game span.bb-seed {
 
 }
 
