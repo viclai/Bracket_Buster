@@ -88,7 +88,7 @@
         "localBaseUrl": "https://bracket-buster.herokuapp.com",
         "store": {
             // Let's use PostgreSQL as our default data store in prod
-            "adapter": "postgres",
+            "type": "postgres",
             // Again, a PaaS host like Heroku will probably provide the db connection
             // URL to you through the environment, so we tell atlassian-connect-express to use that value.
             "url": "$DATABASE_URL"
