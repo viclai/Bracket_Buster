@@ -87,11 +87,11 @@
         // This is the public URL to your production add-on.
         "localBaseUrl": "https://bracket-buster.herokuapp.com",
         "store": {
-            // Let's use Redis as our default data store in prod
-            "adapter": "redis",
+            // Let's use PostgreSQL as our default data store in prod
+            "adapter": "postgres",
             // Again, a PaaS host like Heroku will probably provide the db connection
             // URL to you through the environment, so we tell atlassian-connect-express to use that value.
-            "url": "$REDIS_URL"
+            "url": "$DATABASE_URL"
         },
         // Make sure that your add-on can only be registered by the hosts on
         // these domains.
