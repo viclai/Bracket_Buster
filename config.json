@@ -6,7 +6,7 @@
         // need to use a local tunnel tool (we highly recommend https://ngrok.com)
         // to make your local add-on server accessible from the internet. You'll also
         // need to specify this property with the base URL of your tunnel:
-        "localBaseUrl": "https://b28a1433.ngrok.io",
+        "localBaseUrl": "https://d60a6312.ngrok.io",
         // HipChat add-ons don't use asymmetric key algos
         "usePublicKey": false,
         // HipChat add-ons don't support auto registration with HipChat.com so
@@ -87,11 +87,9 @@
         // This is the public URL to your production add-on.
         "localBaseUrl": "https://bracket-buster.herokuapp.com",
         "store": {
-            // Let's use PostgreSQL as our default data store in prod
-            "type": "postgres",
-            // Again, a PaaS host like Heroku will probably provide the db connection
-            // URL to you through the environment, so we tell atlassian-connect-express to use that value.
-            "url": "$DATABASE_URL"
+            "adapter": "jugglingdb",
+            "type": "sqlite3",
+            "database": "store.db"
         },
         // Make sure that your add-on can only be registered by the hosts on
         // these domains.
