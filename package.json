@@ -16,7 +16,6 @@
     "errorhandler": "^1.4.3",
     "express": "^4.14.0",
     "express-hbs": "^1.0.1",
-    "jugglingdb-postgres": "^0.1.0",
     "lodash": "^4.13.1",
     "morgan": "^1.7.0",
     "request": "^2.72.0",
