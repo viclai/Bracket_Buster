@@ -1,14 +1,16 @@
 <!doctype html>
 <html>
-
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>{{name}}</title>
     <link rel="shortcut icon" type="image/png" href="/img/bracket.png">
-    <link rel="stylesheet" href="//aui-cdn.atlassian.com/aui-adg/5.9.6/css/aui.min.css" media="all">
+    <link rel="stylesheet"
+      href="//aui-cdn.atlassian.com/aui-adg/5.9.6/css/aui.min.css" media="all">
     <link rel="stylesheet" href="{{furl '/css/homepage.css'}}">
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js">
+    </script>
     <script src="//aui-cdn.atlassian.com/aui-adg/5.9.6/js/aui.min.js"></script>
   </head>
 
@@ -22,9 +24,11 @@
                 <img src="/img/bracket.png" alt="{{name}}">
 
                 <div>
+                  <!-- Remove style and 'disabled' to enable again. -->
                   <a href="https://www.hipchat.com/addons/install?url={{links.self}}"
                     class="aui-button aui-button-primary"
-                    title="Install this add-on in HipChat">
+                    title="Install this add-on in HipChat"
+                    style="pointer-events: none" disabled>
                     <span class="aui-icon aui-icon-small aui-iconfont-hipchat">
                     </span>
                     Add to HipChat
@@ -34,7 +38,8 @@
               <div class="aui-item">
                 <h1>
                   {{name}}
-                  <small class="vendor">By <a href="{{vendor.url}}">{{vendor.name}}</a></small>
+                  <small class="vendor">By <a
+                    href="{{vendor.url}}">{{vendor.name}}</a></small>
                 </h1>
                 <p class="subtitle">
                   {{description}}
@@ -50,9 +55,9 @@
             <div class="aui-group">
               <div class="aui-item">
                 <p>
-                  This is a scaffold marketing homepage for your add-on. Use this to show people what your add-on can do.
-                  You can edit this
-                  page in <code>./views/homepage.hbs</code>.
+                  This add-on is currently in development, but feel free to
+                  install it and check it out! Not all features are currently
+                  functional.
                 </p>
               </div>
             </div>
@@ -61,15 +66,24 @@
         <footer id="footer" role="contentinfo">
           <section class="footer-body">
             <ul id="aui-footer-list">
-              <li><a href="https://hipchat.com">HipChat</a></li>
-              <li><a href="https://developer.atlassian.com/hipchat">Developers</a></li>
+              <li>
+                <a href="https://hipchat.com">
+                  HipChat
+                </a>
+              </li>
+              <li>
+                <a href="https://developer.atlassian.com/hipchat">
+                  Developers
+                </a>
+              </li>
               <li>Copyright © 2016 Atlassian</li>
             </ul>
-            <div id="footer-logo"><a href="http://www.atlassian.com/">Atlassian</a></div>
+            <div id="footer-logo">
+              <a href="http://www.atlassian.com/">Atlassian</a>
+            </div>
           </section>
         </footer>
       </div>
     </section>
   </body>
-
 </html>
