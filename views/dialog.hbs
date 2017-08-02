@@ -12,171 +12,34 @@
 {{/contentFor}}
 
 {{#contentFor 'pageScripts'}}
-  $(function(){
-    $('.bb-seed-real').hide();
-    $('.bb-team-name-real').hide();
-    $('.bb-score').hide();
-
-    // http://jsfiddle.net/softvar/BtLxY/
-    $('input[type="radio"]').each(function() {
-      $(this).attr('waschecked', false);
-    });
-
-    $('input[name="bb-option"]').change(function() {
-      var op = $(this).val();
-
-      if (op == 'picks_op') {
-        // Show radio button and team-pick with seed
-        $('.bb-seed').show();
-        $('.bb-team-name').show();
-        $('.bb-seed-real').hide();
-        $('.bb-team-name-real').hide();
-        $('.bb-team-pick').show();
-        $('.bb-score').hide();
-
-      } else if (op == 'scores_op') {
-        // Show score and real team with seed
-        $('.bb-seed').hide();
-        $('.bb-team-name').hide();
-        $('.bb-seed-real').show();
-        $('.bb-team-name-real').show();
-        $('.bb-team-pick').hide();
-        $('.bb-score').show();
-      }
-    });
-
-    $('input[type="radio"].bb-team-pick').click(function() {
-      var name = $(this).attr('name');
-      var hyphenIn = name.indexOf('-');
-      var game = parseInt(name.slice(hyphenIn + 1, hyphenIn + 3));
-      var brack = Math.floor(game / 2);
-      var isTop = (game % 2) == 0;
-      var round = parseInt(name[hyphenIn - 1]) + 1;
-      var brackName;
-      var selector;
-      var other = $('[name=\'' + name + '\']').not(this).first();
-      var seed;
-      var next_round_is_filled = (round - 1) != 1
-                                  && $(other).is(':visible');
-      var curBrack;
-      var curBrackName;
-      var curSelector;
-      var curSeed;
-      var curGame;
-      var i;
-
-      if (brack.toString().length == 1)
-        brack = '0' + brack;
-      brackName = 'round' + round + '-' + brack;
-      selector = '[name=\'' + brackName + '\']';
-
-      if ($(this).attr('waschecked') == "true") {
-        $(this).prop('checked', false);
-        $(this).attr('waschecked', false);
-
-        // Erase team in this bracket
-        curBrack = brack;
-        curGame = game;
-        for (i = round; i <= 6; i++) {
-          if (curBrack.toString().length == 1)
-            curBrack = '0' + curBrack;
-          curBrackName = 'round' + i + '-' + curBrack;
-          curSelector = '[name=\'' + curBrackName + '\']';
-
-          if (curGame % 2 == 0)
-            curSelector += ":first";
-          else
-            curSelector += ":last";
-          if ($(this).siblings('.bb-team-name').first().html() !=
-              $(curSelector).siblings('.bb-team-name').first().html())
-              break;
-
-          curSeed = $(curSelector).siblings('.bb-seed').first();
-          curSeed.html('');
-          $(curSelector).val();
-          $(curSelector).siblings('.bb-team-name').first().html('&nbsp;');
-          $(curSelector).hide();
-          $(curSelector).attr('waschecked', false);
-          $(curSelector).prop('checked', false);
-
-          curGame = parseInt(curBrack);
-          curBrack = Math.floor(curGame / 2);
-        }  
-
-      } else {
-        $(this).attr('waschecked', true);
-
-        // Advance team to next bracket
-        if (isTop)
-          selector += ':first';
-        else
-          selector += ':last';
-        seed = $(selector).siblings('.bb-seed').first();
-        seed.html($(this).siblings('.bb-seed').first().html());
-        $(selector).val($(this).val());
-        $(selector).siblings('.bb-team-name').first().html($(this).val());
-        $(selector).show();
-
-        if (next_round_is_filled) {
-          $(selector).prop('checked', false);
-          $(selector).attr('waschecked', false);
-
-          round++;
-          curGame = parseInt(brack);
-          curBrack = Math.floor(parseInt(brack) / 2);
-          for (i = round; i <= 6; i++) {
-            if (curBrack.toString().length == 1)
-              curBrack = '0' + curBrack;
-            curBrackName = 'round' + i + '-' + curBrack;
-            curSelector = '[name=\'' + curBrackName + '\']';
-
-            if (curGame % 2 == 0)
-              curSelector += ":first";
-            else
-              curSelector += ":last";
-            if ($(other).siblings('.bb-team-name').first().html() !=
-                $(curSelector).siblings('.bb-team-name').first().html())
-              break;
-
-            curSeed = $(curSelector).siblings('.bb-seed').first();
-            curSeed.html('');
-            $(curSelector).siblings('.bb-team-name').first().html('&nbsp;');
-            $(curSelector).val('');
-            $(curSelector).hide();
-            $(curSelector).attr('waschecked', false);
-            $(curSelector).prop('checked', false);
-
-            curGame = parseInt(curBrack);
-            curBrack = Math.floor(curGame / 2);
-          }
-        }
-
-      }
-
-      $('input[name=\'' + name + '\']').not(this).attr('waschecked', false);
-    });
-  });
+  <script src="/js/bracket-pick.js"></script>
 {{/contentFor}}
 
-<!-- The dialog has a primary action, declared in the descriptor atlassian-connect.json -->
+<!--
+  The dialog has a primary action, declared in the descriptor
+  atlassian-connect.json
+-->
 <!-- It is implemented in the js/addon.js file imported in the layout -->
 
-<a href="" target="_blank">Open in New Tab</a>
 {{#if bracketData.state.unavailable}}
   {{!-- Bracket is either not ready yet or there is an error. --}}
-  The bracket is not available at this time.
+  <div>The bracket is not available at this time.<div>
 {{else}}
+  <a href="" target="_blank">Open in New Tab</a>
+  {{#if bracketData.state.set}}
+    <input id="bb-set" hidden/>
+  {{/if}}
   <div style="position: fixed; width: 100%; text-align: center; background-color: #edf0f4;">
     <input type="radio" name="bb-option" value="picks_op" checked /> My Picks
     <input type="radio" name="bb-option" value="scores_op" /> Results
   </div>
   <table style="width: 100%; margin-left: auto; margin-right: auto;">
     <tr>
-      {{#with bracketData.east}}
+      {{#with bracketData.regions.region1}}
         <td style="width: 50%;">
           <table align="left">
             <tr class="half-bracket">
-              <td class="region"> <!-- East -->
+              <td class="region"> <!-- {{name}} -->
                 <ul class="round" style="margin-top: 10px;">
                   <li class="spacer">&nbsp;</li>
 
@@ -189,7 +52,8 @@
                       <span class="bb-team-name">{{team1.name}}</span>
 
                       <span class="bb-score">{{team1.score}}</span>
-                      <input type="radio" name="round1-{{@index}}" class="bb-team-pick" value="{{team1.name}}" />
+                      <input type="radio" name="round1-{{add @index 0}}"
+                        class="bb-team-pick" value="{{team1.name}}" />
                     </li>
                     <li class="game game-spacer-left">&nbsp;</li>
                     <li class="game game-bottom">
@@ -200,7 +64,8 @@
                       <span class="bb-team-name">{{team2.name}}</span>
 
                       <span class="bb-score">{{team2.score}}</span>
-                      <input type="radio" name="round1-{{@index}}" class="bb-team-pick" value="{{team2.name}}" />
+                      <input type="radio" name="round1-{{add @index 0}}"
+                        class="bb-team-pick" value="{{team2.name}}" />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -219,7 +84,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team1.score}}</span>
-                      <input type="radio" name="round2-{{@index}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round2-{{add @index 0}}"
+                        class="bb-team-pick" hidden />
                     </li>
                     <li class="game game-spacer-left">&nbsp;</li>
                     <li class="game game-bottom">
@@ -230,7 +96,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team2.score}}</span>
-                      <input type="radio" name="round2-{{@index}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round2-{{add @index 0}}"
+                        class="bb-team-pick" hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -249,7 +116,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team1.score}}</span>
-                      <input type="radio" name="round3-{{@index}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round3-{{add @index 0}}"
+                        class="bb-team-pick" hidden />
                     </li>
                     <li class="game game-spacer-left">&nbsp;</li>
                     <li class="game game-bottom">
@@ -260,7 +128,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team2.score}}</span>
-                      <input type="radio" name="round3-{{@index}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round3-{{add @index 0}}"
+                        class="bb-team-pick" hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -279,7 +148,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team1.score}}</span>
-                      <input type="radio" name="round4-{{@index}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round4-{{add @index 0}}"
+                        class="bb-team-pick" hidden />
                     </li>
                     <li class="game game-spacer-left">&nbsp;</li>
                     <li class="game game-bottom">
@@ -290,7 +160,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team2.score}}</span>
-                      <input type="radio" name="round4-{{@index}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round4-{{add @index 0}}"
+                        class="bb-team-pick" hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -302,11 +173,11 @@
         </td>
       {{/with}}
 
-      {{#with bracketData.midwest}}
+      {{#with bracketData.regions.region2}}
         <td style="width: 50%;">
           <table align="right">
             <tr class="half-bracket">
-              <td class="region"> <!-- Midwest -->
+              <td class="region"> <!-- {{name}} -->
                 <ul class="round">
                   <li class="spacer">&nbsp;</li>
 
@@ -319,7 +190,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team1.score}}</span>
-                      <input type="radio" name="round4-{{add @index 2}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round4-{{add @index 2}}"
+                        class="bb-team-pick" hidden />
                     </li>
                     <li class="game game-spacer-right">&nbsp;</li>
                     <li class="game game-bottom">
@@ -330,7 +202,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team2.score}}</span>
-                      <input type="radio" name="round4-{{add @index 2}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round4-{{add @index 2}}"
+                        class="bb-team-pick" hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -349,7 +222,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team1.score}}</span>
-                      <input type="radio" name="round4-{{add @index 4}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round3-{{add @index 4}}"
+                        class="bb-team-pick" hidden />
                     </li>
                     <li class="game game-spacer-right">&nbsp;</li>
                     <li class="game game-bottom">
@@ -360,7 +234,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team2.score}}</span>
-                      <input type="radio" name="round4-{{add @index 4}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round3-{{add @index 4}}"
+                        class="bb-team-pick" hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -379,7 +254,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team1.score}}</span>
-                      <input type="radio" name="round4-{{add @index 8}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round2-{{add @index 8}}"
+                        class="bb-team-pick" hidden />
                     </li>
                     <li class="game game-spacer-right">&nbsp;</li>
                     <li class="game game-bottom">
@@ -390,7 +266,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team2.score}}</span>
-                      <input type="radio" name="round4-{{add @index 8}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round2-{{add @index 8}}"
+                        class="bb-team-pick" hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -409,19 +286,19 @@
                       <span class="bb-team-name">{{team1.name}}</span>
 
                       <span class="bb-score">{{team1.score}}</span>
-                      <input type="radio" name="round4-{{add @index 16}}"
+                      <input type="radio" name="round1-{{add @index 16}}"
                         class="bb-team-pick" value="{{team1.name}}" />
                     </li>
                     <li class="game game-spacer-right">&nbsp;</li>
                     <li class="game game-bottom">
-                      <span class="bb-seed">{{team2.seed}}</span>
+                      <span class="bb-seed-real">{{team2.seed}}</span>
                       <span class="bb-seed">{{team2.seed}}</span>
 
                       <span class="bb-team-name-real">{{team2.name}}</span>
                       <span class="bb-team-name">{{team2.name}}</span>
 
                       <span class="bb-score">{{team2.score}}</span>
-                      <input type="radio" name="round4-{{add @index 16}}"
+                      <input type="radio" name="round1-{{add @index 16}}"
                         class="bb-team-pick" value="{{team2.name}}" />
                     </li>
 
@@ -436,7 +313,7 @@
     </tr>
   </table>
 
-  {{#with bracketData.national}}
+  {{#with bracketData.regions.national}}
     <table style="width: 100%; margin-left: auto; margin-right: auto;">
       <tr>
         <td style="width: 33%;">
@@ -448,36 +325,38 @@
 
                   <li class="game game-top">
                     <span class="bb-seed-real">
-                      {{[Final Four].east.seed}}
+                      {{[Final Four].team1.seed}}
                     </span>
                     <span class="bb-seed">&nbsp;</span>
 
                     <span class="bb-team-name-real">
-                      {{[Final Four].east.name}}
+                      {{[Final Four].team1.name}}
                     </span>
                     <span class="bb-team-name">&nbsp;</span>
 
                     <span class="bb-score">
-                      {{[Final Four].east.score}}
+                      {{[Final Four].team1.score}}
                     </span>
-                    <input type="radio" name="round5-{{add @index}}" class="bb-team-pick" hidden />
+                    <input type="radio" name="round5-00"
+                      class="bb-team-pick" hidden />
                   </li>
                   <li class="game game-spacer-left">&nbsp;</li>
                   <li class="game game-bottom">
                     <span class="bb-seed-real">
-                      {{[Final Four].west.seed}}
+                      {{[Final Four].team2.seed}}
                     </span>
                     <span class="bb-seed">&nbsp;</span>
 
                     <span class="bb-team-name-real">
-                      {{[Final Four].west.name}}
+                      {{[Final Four].team2.name}}
                     </span>
                     <span class="bb-team-name">&nbsp;</span>
 
                     <span class="bb-score">
-                      {{[Final Four].west.score}}
+                      {{[Final Four].team2.score}}
                     </span>
-                    <input type="radio" name="round5-{{add @index}}" class="bb-team-pick" hidden />
+                    <input type="radio" name="round5-00"
+                      class="bb-team-pick" hidden />
                   </li>
 
                   <li class="spacer">&nbsp;</li>
@@ -508,7 +387,8 @@
                     <span class="bb-score">
                       {{Championship.team1.score}}
                     </span>
-                    <input type="radio" name="round6-{{add @index}}" class="bb-team-pick" hidden />
+                    <input type="radio" name="round6-00"
+                      class="bb-team-pick" hidden />
                   </li>
                   <li class="game game-spacer-mid">&nbsp;</li>
                   <li class="game game-bottom">
@@ -525,7 +405,8 @@
                     <span class="bb-score">
                       {{Championship.team2.score}}
                     </span>
-                    <input type="radio" name="round6-{{add @index}}" class="bb-team-pick" hidden />
+                    <input type="radio" name="round6-00"
+                      class="bb-team-pick" hidden />
                   </li>
 
                   <li class="spacer">&nbsp;</li>
@@ -544,36 +425,38 @@
 
                   <li class="game game-top">
                     <span class="bb-seed-real">
-                      {{[Final Four].midwest.seed}}
+                      {{[Final Four].team3.seed}}
                     </span>
                     <span class="bb-seed">&nbsp;</span>
 
                     <span class="bb-team-name-real">
-                      {{[Final Four].midwest.name}}
+                      {{[Final Four].team3.name}}
                     </span>
                     <span class="bb-team-name">&nbsp;</span>
 
                     <span class="bb-score">
-                      {{[Final Four].midwest.score}}
+                      {{[Final Four].team3.score}}
                     </span>
-                    <input type="radio" name="round5-{{add @index 1}}" class="bb-team-pick" hidden />
+                    <input type="radio" name="round5-01"
+                      class="bb-team-pick" hidden />
                   </li>
                   <li class="game game-spacer-right">&nbsp;</li>
                   <li class="game game-bottom">
                     <span class="bb-seed-real">
-                      {{[Final Four].south.seed}}
+                      {{[Final Four].team4.seed}}
                     </span>
                     <span class="bb-seed">&nbsp;</span>
 
                     <span class="bb-team-name-real">
-                      {{[Final Four].south.name}}
+                      {{[Final Four].team4.name}}
                     </span>
                     <span class="bb-team-name">&nbsp;</span>
 
                     <span class="bb-score">
-                      {{[Final Four].south.score}}
+                      {{[Final Four].team4.score}}
                     </span>
-                    <input type="radio" name="round5-{{add @index 1}}" class="bb-team-pick" hidden />
+                    <input type="radio" name="round5-01"
+                      class="bb-team-pick" hidden />
                   </li>
 
                   <li class="spacer">&nbsp;</li>
@@ -587,11 +470,11 @@
 
   <table style="width: 100%; margin-left: auto; margin-right: auto;">
     <tr>
-      {{#with bracketData.west}}
+      {{#with bracketData.regions.region3}}
         <td style="width: 50%;">
           <table align="left">
             <tr class="half-bracket">
-              <td class="region"> <!-- West -->
+              <td class="region"> <!-- {{name}} -->
                 <ul class="round">
                   <li class="spacer">&nbsp;</li>
 
@@ -636,7 +519,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team1.score}}</span>
-                      <input type="radio" name="round2-{{add @index 4}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round2-{{add @index 4}}"
+                        class="bb-team-pick" hidden />
                     </li>
                     <li class="game game-spacer-left">&nbsp;</li>
                     <li class="game game-bottom">
@@ -647,7 +531,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team2.score}}</span>
-                      <input type="radio" name="round2-{{add @index 4}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round2-{{add @index 4}}"
+                        class="bb-team-pick" hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -666,7 +551,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team1.score}}</span>
-                      <input type="radio" name="round3-{{add @index 2}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round3-{{add @index 2}}"
+                        class="bb-team-pick" hidden />
                     </li>
                     <li class="game game-spacer-left">&nbsp;</li>
                     <li class="game game-bottom">
@@ -677,7 +563,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team2.score}}</span>
-                      <input type="radio" name="round3-{{add @index 2}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round3-{{add @index 2}}"
+                        class="bb-team-pick" hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -696,7 +583,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team1.score}}</span>
-                      <input type="radio" name="round4-{{add @index 1}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round4-{{add @index 1}}"
+                        class="bb-team-pick" hidden />
                     </li>
                     <li class="game game-spacer-left">&nbsp;</li>
                     <li class="game game-bottom">
@@ -707,7 +595,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team2.score}}</span>
-                      <input type="radio" name="round4-{{add @index 1}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round4-{{add @index 1}}"
+                        class="bb-team-pick" hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -719,11 +608,11 @@
         </td>
       {{/with}}
 
-      {{#with bracketData.south}}
+      {{#with bracketData.regions.region4}}
         <td style="width: 50%;">
           <table align="right">
             <tr class="half-bracket">
-              <td class="region"> <!-- South -->
+              <td class="region"> <!-- {{name}} -->
                 <ul class="round">
                   <li class="spacer">&nbsp;</li>
 
@@ -736,7 +625,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team1.score}}</span>
-                      <input type="radio" name="round4-{{add @index 3}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round4-{{add @index 3}}"
+                        class="bb-team-pick" hidden />
                     </li>
                     <li class="game game-spacer-right">&nbsp;</li>
                     <li class="game game-bottom">
@@ -747,7 +637,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team2.score}}</span>
-                      <input type="radio" name="round4-{{add @index 3}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round4-{{add @index 3}}"
+                        class="bb-team-pick" hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -766,7 +657,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team1.score}}</span>
-                      <input type="radio" name="round3-{{add @index 6}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round3-{{add @index 6}}"
+                        class="bb-team-pick" hidden />
                     </li>
                     <li class="game game-spacer-right">&nbsp;</li>
                     <li class="game game-bottom">
@@ -777,7 +669,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team2.score}}</span>
-                      <input type="radio" name="round3-{{add @index 6}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round3-{{add @index 6}}"
+                        class="bb-team-pick" hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -796,7 +689,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team1.score}}</span>
-                      <input type="radio" name="round2-{{add @index 12}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round2-{{add @index 12}}"
+                        class="bb-team-pick" hidden />
                     </li>
                     <li class="game game-spacer-right">&nbsp;</li>
                     <li class="game game-bottom">
@@ -807,7 +701,8 @@
                       <span class="bb-team-name">&nbsp;</span>
 
                       <span class="bb-score">{{team2.score}}</span>
-                      <input type="radio" name="round2-{{add @index 12}}" class="bb-team-pick" hidden />
+                      <input type="radio" name="round2-{{add @index 12}}"
+                        class="bb-team-pick" hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>

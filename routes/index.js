@@ -2,7 +2,7 @@ var request = require('request');
 var cors = require('cors');
 var uuid = require('uuid');
 var url = require('url');
-var BracketManager = require('../public/js/bracket_manager.js');
+var BracketManager = require('../public/js/bracket-manager.js');
 
 // This is the heart of your HipChat Connect add-on. For more information,
 // take a look at
@@ -126,10 +126,12 @@ module.exports = function (app, addon) {
       request(bracket_manager.scrape_url, function (error, response, html) {
         if (!error && response.statusCode == 200) {
           bracket_manager.populate_data(html);
-          //print_data(bracket_manager.bracket.data); // DEBUG
+          //bracket_manager.bracket.print_data(); // DEBUG
           if (Object.keys(bracket_manager.bracket.data).length !== 0) {
             view_context['bracketData'] = bracket_manager.bracket.data;
           }
+          //view_context['bracketData'] = bracket_manager.bracket.available_bracket_state(); // DEBUG
+          //view_context['bracketData'] = bracket_manager.bracket.set_bracket_state(); // DEBUG
           view_context['identity'] = req.identity;
           res.render('dialog', view_context);
         } else {
