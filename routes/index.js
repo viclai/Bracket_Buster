@@ -114,26 +114,37 @@ module.exports = function (app, addon) {
     }
   );
 
-  // This is an example dialog controller that can be launched when clicking
-  // on the glance.
+  // This is a dialog controller that can be launched when clicking on
+  // the glance.
   // https://developer.atlassian.com/hipchat/guide/dialog
   app.get('/dialog',
     addon.authenticate(),
     function (req, res) {
       var view_context = {};
       var bracket_manager = new BracketManager();
+      
+      // TODO: Handle case where user decides to open in the bracket in a new
+      //       tab. In this case, there will not be any 'Save' button, so
+      //       the radio input buttons may have to be disabled. This case may
+      //       be implemented by using a passed parameter in query string.
 
       request(bracket_manager.scrape_url, function (error, response, html) {
         if (!error && response.statusCode == 200) {
-          bracket_manager.populate_data(html);
-          //bracket_manager.bracket.print_data(); // DEBUG
-          if (Object.keys(bracket_manager.bracket.data).length !== 0) {
-            view_context['bracketData'] = bracket_manager.bracket.data;
-          }
-          //view_context['bracketData'] = bracket_manager.bracket.available_bracket_state(); // DEBUG
-          //view_context['bracketData'] = bracket_manager.bracket.set_bracket_state(); // DEBUG
-          view_context['identity'] = req.identity;
-          res.render('dialog', view_context);
+          addon.settings.get(
+            'bracket-picks',
+            req.clientInfo.clientKey).then(function(pred_data) {
+              bracket_manager.populate_data(html, pred_data);
+              //console.log(JSON.stringify(bracket_manager.bracket.data));
+              //bracket_manager.bracket.print_data(); // DEBUG
+              if (Object.keys(bracket_manager.bracket.data).length !== 0) {
+                view_context['bracketData'] = bracket_manager.bracket.data;
+              }
+              //view_context['bracketData'] = bracket_manager.bracket.available_bracket_state(); // DEBUG
+              //view_context['bracketData'] = bracket_manager.bracket.set_bracket_state(); // DEBUG
+              view_context['identity'] = req.identity;
+              res.render('dialog', view_context);
+            }
+          );
         } else {
 
           console.log('ERROR fetching HTML');
@@ -142,6 +153,26 @@ module.exports = function (app, addon) {
           view_context['bracketData']['unavailable'] = true;
 
         }
+      });
+    }
+  );
+
+  app.post('/bracket_pick',
+    addon.authenticate(),
+    function (req, res) {
+      // Use addon.settings to store bracket picks
+      addon.settings.set(
+        'bracket-picks',
+        req.body.data,
+        req.clientInfo.clientKey
+      ).then(function() {
+        addon.settings.get(
+          'bracket-picks',
+          req.clientInfo.clientKey).then(function(data) {
+            console.log('stored', JSON.stringify(data));
+          }
+        );
+        res.sendStatus(200);
       });
     }
   );
@@ -173,10 +204,13 @@ module.exports = function (app, addon) {
   app.post('/webhook',
     addon.authenticate(),
     function (req, res) {
-      hipchat.sendMessage(req.clientInfo, req.identity.roomId, 'Bracket not available yet.')
-        .then(function (data) {
+      hipchat.sendMessage(
+        req.clientInfo,
+        req.identity.roomId,
+        'Bracket not available yet.').then(function (data) {
           res.sendStatus(200);
-        });
+        }
+      );
     }
   );
 

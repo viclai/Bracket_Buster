@@ -11,15 +11,11 @@
   </style>
 {{/contentFor}}
 
-{{#contentFor 'pageScripts'}}
-  <script src="/js/bracket-pick.js"></script>
-{{/contentFor}}
-
 <!--
   The dialog has a primary action, declared in the descriptor
-  atlassian-connect.json
+  atlassian-connect.json. It is implemented in the js/addon.js file imported
+  in the layout.
 -->
-<!-- It is implemented in the js/addon.js file imported in the layout -->
 
 {{#if bracketData.state.unavailable}}
   {{!-- Bracket is either not ready yet or there is an error. --}}
@@ -29,7 +25,8 @@
   {{#if bracketData.state.set}}
     <input id="bb-set" hidden/>
   {{/if}}
-  <div style="position: fixed; width: 100%; text-align: center; background-color: #edf0f4;">
+  <input id="bb-empty-bracket" value="{{bracketData.empty_bracket}}" hidden />
+  <div id="bb-options">
     <input type="radio" name="bb-option" value="picks_op" checked /> My Picks
     <input type="radio" name="bb-option" value="scores_op" /> Results
   </div>
@@ -45,27 +42,35 @@
 
                   {{#each [1st Round]}}
                     <li class="game game-top">
-                      <span class="bb-seed-real">{{team1.seed}}</span>
-                      <span class="bb-seed">{{team1.seed}}</span>
+                      <span class="bb-seed-real">{{result.team1.seed}}</span>
+                      <span class="bb-seed">{{prediction.team1.seed}}</span>
 
-                      <span class="bb-team-name-real">{{team1.name}}</span>
-                      <span class="bb-team-name">{{team1.name}}</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team1.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~prediction.team1.name~}}
+                      </span>
 
-                      <span class="bb-score">{{team1.score}}</span>
+                      <span class="bb-score">{{{result.team1.score}}}</span>
                       <input type="radio" name="round1-{{add @index 0}}"
-                        class="bb-team-pick" value="{{team1.name}}" />
+                        class="bb-team-pick" value="{{result.team1.name}}" />
                     </li>
                     <li class="game game-spacer-left">&nbsp;</li>
                     <li class="game game-bottom">
-                      <span class="bb-seed-real">{{team2.seed}}</span>
-                      <span class="bb-seed">{{team2.seed}}</span>
+                      <span class="bb-seed-real">{{{result.team2.seed}}}</span>
+                      <span class="bb-seed">{{{prediction.team2.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team2.name}}</span>
-                      <span class="bb-team-name">{{team2.name}}</span>
+                      <span class="bb-team-name-real">
+                        {{result.team2.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team2.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team2.score}}</span>
+                      <span class="bb-score">{{{result.team2.score}}}</span>
                       <input type="radio" name="round1-{{add @index 0}}"
-                        class="bb-team-pick" value="{{team2.name}}" />
+                        class="bb-team-pick" value="{{{result.team2.name}}}" />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -77,27 +82,37 @@
 
                   {{#each [2nd Round]}}
                     <li class="game game-top">
-                      <span class="bb-seed-real">{{team1.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{{result.team1.seed}}}</span>
+                      <span class="bb-seed">{{{prediction.team1.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team1.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~{result.team1.name}~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team1.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team1.score}}</span>
+                      <span class="bb-score">{{{result.team1.score}}}</span>
                       <input type="radio" name="round2-{{add @index 0}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick" value="{{{prediction.team1.name}}}"
+                        hidden />
                     </li>
                     <li class="game game-spacer-left">&nbsp;</li>
                     <li class="game game-bottom">
-                      <span class="bb-seed-real">{{team2.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team2.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team2.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team2.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team2.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team2.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team2.score}}</span>
+                      <span class="bb-score">{{result.team2.score}}</span>
                       <input type="radio" name="round2-{{add @index 0}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick" value="{{{prediction.team2.name}}}"
+                        hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -109,27 +124,37 @@
 
                   {{#each [Sweet 16]}}
                     <li class="game game-top">
-                      <span class="bb-seed-real">{{team1.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team1.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team1.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team1.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team1.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team1.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team1.score}}</span>
+                      <span class="bb-score">{{result.team1.score}}</span>
                       <input type="radio" name="round3-{{add @index 0}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick" value="{{{prediction.team1.name}}}"
+                        hidden />
                     </li>
                     <li class="game game-spacer-left">&nbsp;</li>
                     <li class="game game-bottom">
-                      <span class="bb-seed-real">{{team2.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team2.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team2.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team2.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team2.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team2.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team2.score}}</span>
+                      <span class="bb-score">{{result.team2.score}}</span>
                       <input type="radio" name="round3-{{add @index 0}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick" value="{{{prediction.team2.name}}}"
+                        hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -141,27 +166,37 @@
 
                   {{#each [Elite 8]}}
                     <li class="game game-top">
-                      <span class="bb-seed-real">{{team1.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team1.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team1.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team1.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team1.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team1.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team1.score}}</span>
+                      <span class="bb-score">{{result.team1.score}}</span>
                       <input type="radio" name="round4-{{add @index 0}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick" value="{{{prediction.team1.name}}}"
+                        hidden />
                     </li>
                     <li class="game game-spacer-left">&nbsp;</li>
                     <li class="game game-bottom">
-                      <span class="bb-seed-real">{{team2.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team2.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team2.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team2.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team2.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team2.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team2.score}}</span>
+                      <span class="bb-score">{{result.team2.score}}</span>
                       <input type="radio" name="round4-{{add @index 0}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick" value="{{{prediction.team2.name}}}"
+                        hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -183,27 +218,37 @@
 
                   {{#each [Elite 8]}}
                     <li class="game game-top">
-                      <span class="bb-seed-real">{{team1.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team1.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team1.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team1.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team1.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team1.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team1.score}}</span>
+                      <span class="bb-score">{{result.team1.score}}</span>
                       <input type="radio" name="round4-{{add @index 2}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick" value="{{{prediction.team1.name}}}"
+                        hidden />
                     </li>
                     <li class="game game-spacer-right">&nbsp;</li>
                     <li class="game game-bottom">
-                      <span class="bb-seed-real">{{team2.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team2.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team2.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team2.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team2.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team2.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team2.score}}</span>
+                      <span class="bb-score">{{result.team2.score}}</span>
                       <input type="radio" name="round4-{{add @index 2}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick" value="{{{prediction.team2.name}}}"
+                        hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -215,27 +260,37 @@
 
                   {{#each [Sweet 16]}}
                     <li class="game game-top">
-                      <span class="bb-seed-real">{{team1.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team1.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team1.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team1.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team1.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team1.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team1.score}}</span>
+                      <span class="bb-score">{{result.team1.score}}</span>
                       <input type="radio" name="round3-{{add @index 4}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick" value="{{{prediction.team1.name}}}"
+                        hidden />
                     </li>
                     <li class="game game-spacer-right">&nbsp;</li>
                     <li class="game game-bottom">
-                      <span class="bb-seed-real">{{team2.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team2.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team2.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team2.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team2.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team2.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team2.score}}</span>
+                      <span class="bb-score">{{result.team2.score}}</span>
                       <input type="radio" name="round3-{{add @index 4}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick" value="{{{prediction.team2.name}}}"
+                        hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -247,27 +302,37 @@
 
                   {{#each [2nd Round]}}
                     <li class="game game-top">
-                      <span class="bb-seed-real">{{team1.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team1.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team1.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team1.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team1.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team1.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team1.score}}</span>
+                      <span class="bb-score">{{result.team1.score}}</span>
                       <input type="radio" name="round2-{{add @index 8}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick" value="{{{prediction.team1.name}}}"
+                        hidden />
                     </li>
                     <li class="game game-spacer-right">&nbsp;</li>
                     <li class="game game-bottom">
-                      <span class="bb-seed-real">{{team2.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team2.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team2.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team2.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team2.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team2.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team2.score}}</span>
+                      <span class="bb-score">{{result.team2.score}}</span>
                       <input type="radio" name="round2-{{add @index 8}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick" value="{{{prediction.team2.name}}}"
+                        hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -279,27 +344,35 @@
 
                   {{#each [1st Round]}}
                     <li class="game game-top">
-                      <span class="bb-seed-real">{{team1.seed}}</span>
-                      <span class="bb-seed">{{team1.seed}}</span>
+                      <span class="bb-seed-real">{{result.team1.seed}}</span>
+                      <span class="bb-seed">{{prediction.team1.seed}}</span>
 
-                      <span class="bb-team-name-real">{{team1.name}}</span>
-                      <span class="bb-team-name">{{team1.name}}</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team1.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~prediction.team1.name~}}
+                      </span>
 
-                      <span class="bb-score">{{team1.score}}</span>
+                      <span class="bb-score">{{result.team1.score}}</span>
                       <input type="radio" name="round1-{{add @index 16}}"
-                        class="bb-team-pick" value="{{team1.name}}" />
+                        class="bb-team-pick" value="{{result.team1.name}}" />
                     </li>
                     <li class="game game-spacer-right">&nbsp;</li>
                     <li class="game game-bottom">
-                      <span class="bb-seed-real">{{team2.seed}}</span>
-                      <span class="bb-seed">{{team2.seed}}</span>
+                      <span class="bb-seed-real">{{result.team2.seed}}</span>
+                      <span class="bb-seed">{{prediction.team2.seed}}</span>
 
-                      <span class="bb-team-name-real">{{team2.name}}</span>
-                      <span class="bb-team-name">{{team2.name}}</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team2.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~prediction.team2.name~}}
+                      </span>
 
-                      <span class="bb-score">{{team2.score}}</span>
+                      <span class="bb-score">{{result.team2.score}}</span>
                       <input type="radio" name="round1-{{add @index 16}}"
-                        class="bb-team-pick" value="{{team2.name}}" />
+                        class="bb-team-pick" value="{{result.team2.name}}" />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -325,38 +398,50 @@
 
                   <li class="game game-top">
                     <span class="bb-seed-real">
-                      {{[Final Four].team1.seed}}
+                      {{~[Final Four].result.team1.seed~}}
                     </span>
-                    <span class="bb-seed">&nbsp;</span>
+                    <span class="bb-seed">
+                      {{~{[Final Four].prediction.team1.seed}~}}
+                    </span>
 
                     <span class="bb-team-name-real">
-                      {{[Final Four].team1.name}}
+                      {{~[Final Four].result.team1.name~}}
                     </span>
-                    <span class="bb-team-name">&nbsp;</span>
+                    <span class="bb-team-name">
+                      {{~{[Final Four].prediction.team1.name}~}}
+                    </span>
 
                     <span class="bb-score">
-                      {{[Final Four].team1.score}}
+                      {{~[Final Four].result.team1.score~}}
                     </span>
                     <input type="radio" name="round5-00"
-                      class="bb-team-pick" hidden />
+                      class="bb-team-pick"
+                      value="{{{[Final Four].prediction.team1.name}}}"
+                      hidden />
                   </li>
                   <li class="game game-spacer-left">&nbsp;</li>
                   <li class="game game-bottom">
                     <span class="bb-seed-real">
-                      {{[Final Four].team2.seed}}
+                      {{~[Final Four].result.team2.seed~}}
                     </span>
-                    <span class="bb-seed">&nbsp;</span>
+                    <span class="bb-seed">
+                      {{~{[Final Four].prediction.team2.seed}~}}
+                    </span>
 
                     <span class="bb-team-name-real">
-                      {{[Final Four].team2.name}}
+                      {{~[Final Four].result.team2.name~}}
                     </span>
-                    <span class="bb-team-name">&nbsp;</span>
+                    <span class="bb-team-name">
+                      {{~{[Final Four].prediction.team2.name}~}}
+                    </span>
 
                     <span class="bb-score">
-                      {{[Final Four].team2.score}}
+                      {{~[Final Four].result.team2.score~}}
                     </span>
                     <input type="radio" name="round5-00"
-                      class="bb-team-pick" hidden />
+                      class="bb-team-pick"
+                      value="{{{[Final Four].prediction.team2.name}}}"
+                      hidden />
                   </li>
 
                   <li class="spacer">&nbsp;</li>
@@ -375,38 +460,50 @@
 
                   <li class="game game-top">
                     <span class="bb-seed-real">
-                      {{Championship.team1.seed}}
+                      {{~Championship.result.team1.seed~}}
                     </span>
-                    <span class="bb-seed">&nbsp;</span>
+                    <span class="bb-seed">
+                      {{~{Championship.prediction.team1.seed}~}}
+                    </span>
 
                     <span class="bb-team-name-real">
-                      {{Championship.team1.name}}
+                      {{~Championship.result.team1.name~}}
                     </span>
-                    <span class="bb-team-name">&nbsp;</span>
+                    <span class="bb-team-name">
+                      {{~{Championship.prediction.team1.name}~}}
+                    </span>
 
                     <span class="bb-score">
-                      {{Championship.team1.score}}
+                      {{Championship.result.team1.score}}
                     </span>
                     <input type="radio" name="round6-00"
-                      class="bb-team-pick" hidden />
+                      class="bb-team-pick"
+                      value="{{{Championship.prediction.team1.name}}}"
+                      hidden />
                   </li>
                   <li class="game game-spacer-mid">&nbsp;</li>
                   <li class="game game-bottom">
                     <span class="bb-seed-real">
-                      {{Championship.team2.seed}}
+                      {{~Championship.result.team2.seed~}}
                     </span>
-                    <span class="bb-seed">&nbsp;</span>
+                    <span class="bb-seed">
+                      {{~{Championship.prediction.team2.seed}~}}
+                    </span>
 
                     <span class="bb-team-name-real">
-                      {{Championship.team2.name}}
+                      {{~Championship.result.team2.name~}}
                     </span>
-                    <span class="bb-team-name">&nbsp;</span>
+                    <span class="bb-team-name">
+                      {{~{Championship.prediction.team2.name}~}}
+                    </span>
 
                     <span class="bb-score">
-                      {{Championship.team2.score}}
+                      {{~Championship.result.team2.score~}}
                     </span>
                     <input type="radio" name="round6-00"
-                      class="bb-team-pick" hidden />
+                      class="bb-team-pick"
+                      value="{{{Championship.prediction.team2.name}}}"
+                      hidden />
                   </li>
 
                   <li class="spacer">&nbsp;</li>
@@ -425,38 +522,50 @@
 
                   <li class="game game-top">
                     <span class="bb-seed-real">
-                      {{[Final Four].team3.seed}}
+                      {{~[Final Four].result.team3.seed~}}
                     </span>
-                    <span class="bb-seed">&nbsp;</span>
+                    <span class="bb-seed">
+                      {{~{[Final Four].prediction.team3.seed}~}}
+                    </span>
 
                     <span class="bb-team-name-real">
-                      {{[Final Four].team3.name}}
+                      {{~[Final Four].result.team3.name~}}
                     </span>
-                    <span class="bb-team-name">&nbsp;</span>
+                    <span class="bb-team-name">
+                      {{~{[Final Four].prediction.team3.name}~}}
+                    </span>
 
                     <span class="bb-score">
-                      {{[Final Four].team3.score}}
+                      {{~[Final Four].result.team3.score~}}
                     </span>
                     <input type="radio" name="round5-01"
-                      class="bb-team-pick" hidden />
+                      class="bb-team-pick"
+                      value="{{{[Final Four].prediction.team3.name}}}"
+                      hidden />
                   </li>
                   <li class="game game-spacer-right">&nbsp;</li>
                   <li class="game game-bottom">
                     <span class="bb-seed-real">
-                      {{[Final Four].team4.seed}}
+                      {{~[Final Four].result.team4.seed~}}
                     </span>
-                    <span class="bb-seed">&nbsp;</span>
+                    <span class="bb-seed">
+                      {{~{[Final Four].prediction.team4.seed}~}}
+                    </span>
 
                     <span class="bb-team-name-real">
-                      {{[Final Four].team4.name}}
+                      {{~[Final Four].result.team4.name~}}
                     </span>
-                    <span class="bb-team-name">&nbsp;</span>
+                    <span class="bb-team-name">
+                      {{~{[Final Four].prediction.team4.name}~}}
+                    </span>
 
                     <span class="bb-score">
-                      {{[Final Four].team4.score}}
+                      {{~[Final Four].result.team4.score~}}
                     </span>
                     <input type="radio" name="round5-01"
-                      class="bb-team-pick" hidden />
+                      class="bb-team-pick"
+                      value="{{{[Final Four].prediction.team4.name}}}"
+                      hidden />
                   </li>
 
                   <li class="spacer">&nbsp;</li>
@@ -480,27 +589,35 @@
 
                   {{#each [1st Round]}}
                     <li class="game game-top">
-                      <span class="bb-seed-real">{{team1.seed}}</span>
-                      <span class="bb-seed">{{team1.seed}}</span>
+                      <span class="bb-seed-real">{{result.team1.seed}}</span>
+                      <span class="bb-seed">{{prediction.team1.seed}}</span>
 
-                      <span class="bb-team-name-real">{{team1.name}}</span>
-                      <span class="bb-team-name">{{team1.name}}</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team1.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~prediction.team1.name~}}
+                      </span>
 
-                      <span class="bb-score">{{team1.score}}</span>
+                      <span class="bb-score">{{result.team1.score}}</span>
                       <input type="radio" name="round1-{{add @index 8}}"
-                        class="bb-team-pick" value="{{team1.name}}" />
+                        class="bb-team-pick" value="{{result.team1.name}}" />
                     </li>
                     <li class="game game-spacer-left">&nbsp;</li>
                     <li class="game game-bottom">
-                      <span class="bb-seed-real">{{team2.seed}}</span>
-                      <span class="bb-seed">{{team2.seed}}</span>
+                      <span class="bb-seed-real">{{result.team2.seed}}</span>
+                      <span class="bb-seed">{{prediction.team2.seed}}</span>
 
-                      <span class="bb-team-name-real">{{team2.name}}</span>
-                      <span class="bb-team-name">{{team2.name}}</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team2.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~prediction.team2.name~}}
+                      </span>
 
-                      <span class="bb-score">{{team2.score}}</span>
+                      <span class="bb-score">{{result.team2.score}}</span>
                       <input type="radio" name="round1-{{add @index 8}}"
-                        class="bb-team-pick" value="{{team2.name}}" />
+                        class="bb-team-pick" value="{{result.team2.name}}" />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -512,27 +629,39 @@
 
                   {{#each [2nd Round]}}
                     <li class="game game-top">
-                      <span class="bb-seed-real">{{team1.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team1.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team1.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team1.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team1.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team1.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team1.score}}</span>
+                      <span class="bb-score">{{result.team1.score}}</span>
                       <input type="radio" name="round2-{{add @index 4}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick"
+                        value="{{{prediction.team1.name}}}"
+                        hidden />
                     </li>
                     <li class="game game-spacer-left">&nbsp;</li>
                     <li class="game game-bottom">
-                      <span class="bb-seed-real">{{team2.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team2.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team2.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team2.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team2.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team2.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team2.score}}</span>
+                      <span class="bb-score">{{result.team2.score}}</span>
                       <input type="radio" name="round2-{{add @index 4}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick"
+                        value="{{{prediction.team2.name}}}"
+                        hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -544,27 +673,39 @@
 
                   {{#each [Sweet 16]}}
                     <li class="game game-top">
-                      <span class="bb-seed-real">{{team1.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team1.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team1.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team1.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team1.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team1.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team1.score}}</span>
+                      <span class="bb-score">{{result.team1.score}}</span>
                       <input type="radio" name="round3-{{add @index 2}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick"
+                        value="{{{prediction.team1.name}}}"
+                        hidden />
                     </li>
                     <li class="game game-spacer-left">&nbsp;</li>
                     <li class="game game-bottom">
-                      <span class="bb-seed-real">{{team2.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team2.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team2.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team2.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team2.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team2.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team2.score}}</span>
+                      <span class="bb-score">{{result.team2.score}}</span>
                       <input type="radio" name="round3-{{add @index 2}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick"
+                        value="{{{prediction.team2.name}}}"
+                        hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -576,27 +717,39 @@
 
                   {{#each [Elite 8]}}
                     <li class="game game-top">
-                      <span class="bb-seed-real">{{team1.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team1.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team1.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team1.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team1.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team1.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team1.score}}</span>
+                      <span class="bb-score">{{result.team1.score}}</span>
                       <input type="radio" name="round4-{{add @index 1}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick"
+                        value="{{{prediction.team1.name}}}"
+                        hidden />
                     </li>
                     <li class="game game-spacer-left">&nbsp;</li>
                     <li class="game game-bottom">
-                      <span class="bb-seed-real">{{team2.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team2.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team2.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team2.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team2.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team2.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team2.score}}</span>
+                      <span class="bb-score">{{result.team2.score}}</span>
                       <input type="radio" name="round4-{{add @index 1}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick"
+                        value="{{{prediction.team2.name}}}"
+                        hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -618,27 +771,39 @@
 
                   {{#each [Elite 8]}}
                     <li class="game game-top">
-                      <span class="bb-seed-real">{{team1.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team1.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team1.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team1.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team1.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team1.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team1.score}}</span>
+                      <span class="bb-score">{{result.team1.score}}</span>
                       <input type="radio" name="round4-{{add @index 3}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick"
+                        value="{{{prediction.team1.name}}}"
+                        hidden />
                     </li>
                     <li class="game game-spacer-right">&nbsp;</li>
                     <li class="game game-bottom">
-                      <span class="bb-seed-real>{{team2.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real>{{result.team2.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team2.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team2.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team2.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team2.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team2.score}}</span>
+                      <span class="bb-score">{{result.team2.score}}</span>
                       <input type="radio" name="round4-{{add @index 3}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick"
+                        value="{{{prediction.team2.name}}}"
+                        hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -650,27 +815,39 @@
 
                   {{#each [Sweet 16]}}
                     <li class="game game-top">
-                      <span class="bb-seed-real">{{team1.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team1.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team1.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team1.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team1.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team1.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team1.score}}</span>
+                      <span class="bb-score">{{result.team1.score}}</span>
                       <input type="radio" name="round3-{{add @index 6}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick"
+                        value="{{{prediction.team1.name}}}"
+                        hidden />
                     </li>
                     <li class="game game-spacer-right">&nbsp;</li>
                     <li class="game game-bottom">
-                      <span class="bb-seed-real">{{team2.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team2.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team2.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team2.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team2.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team2.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team2.score}}</span>
+                      <span class="bb-score">{{result.team2.score}}</span>
                       <input type="radio" name="round3-{{add @index 6}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick"
+                        value="{{{prediction.team2.name}}}"
+                        hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -682,27 +859,39 @@
 
                   {{#each [2nd Round]}}
                     <li class="game game-top">
-                      <span class="bb-seed-real">{{team1.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team1.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team1.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team1.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team1.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team1.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team1.score}}</span>
+                      <span class="bb-score">{{result.team1.score}}</span>
                       <input type="radio" name="round2-{{add @index 12}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick"
+                        value="{{{prediction.team1.name}}}"
+                        hidden />
                     </li>
                     <li class="game game-spacer-right">&nbsp;</li>
                     <li class="game game-bottom">
-                      <span class="bb-seed-real">{{team2.seed}}</span>
-                      <span class="bb-seed">&nbsp;</span>
+                      <span class="bb-seed-real">{{result.team2.seed}}</span>
+                      <span class="bb-seed">{{{prediction.team2.seed}}}</span>
 
-                      <span class="bb-team-name-real">{{team2.name}}</span>
-                      <span class="bb-team-name">&nbsp;</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team2.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~{prediction.team2.name}~}}
+                      </span>
 
-                      <span class="bb-score">{{team2.score}}</span>
+                      <span class="bb-score">{{result.team2.score}}</span>
                       <input type="radio" name="round2-{{add @index 12}}"
-                        class="bb-team-pick" hidden />
+                        class="bb-team-pick"
+                        value="{{{prediction.team2.name}}}"
+                        hidden />
                     </li>
 
                     <li class="spacer">&nbsp;</li>
@@ -714,27 +903,35 @@
 
                   {{#each [1st Round]}}
                     <li class="game game-top">
-                      <span class="bb-seed-real">{{team1.seed}}</span>
-                      <span class="bb-seed">{{team1.seed}}</span>
+                      <span class="bb-seed-real">{{result.team1.seed}}</span>
+                      <span class="bb-seed">{{prediction.team1.seed}}</span>
 
-                      <span class="bb-team-name-real">{{team1.name}}</span>
-                      <span class="bb-team-name">{{team1.name}}</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team1.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~prediction.team1.name~}}
+                      </span>
 
-                      <span class="bb-score">{{team1.score}}</span>
+                      <span class="bb-score">{{result.team1.score}}</span>
                       <input type="radio" name="round1-{{add @index 24}}"
-                        class="bb-team-pick" value="{{team1.name}}" />
+                        class="bb-team-pick" value="{{result.team1.name}}" />
                     </li>
                     <li class="game game-spacer-right">&nbsp;</li>
                     <li class="game game-bottom">
-                      <span class="bb-seed-real">{{team2.seed}}</span>
-                      <span class="bb-seed">{{team2.seed}}</span>
+                      <span class="bb-seed-real">{{result.team2.seed}}</span>
+                      <span class="bb-seed">{{prediction.team2.seed}}</span>
 
-                      <span class="bb-team-name-real">{{team2.name}}</span>
-                      <span class="bb-team-name">{{team2.name}}</span>
+                      <span class="bb-team-name-real">
+                        {{~result.team2.name~}}
+                      </span>
+                      <span class="bb-team-name">
+                        {{~prediction.team2.name~}}
+                      </span>
 
-                      <span class="bb-score">{{team2.score}}</span>
+                      <span class="bb-score">{{result.team2.score}}</span>
                       <input type="radio" name="round1-{{add @index 24}}"
-                        class="bb-team-pick" value="{{team2.name}}" />
+                        class="bb-team-pick" value="{{result.team2.name}}" />
                     </li>
 
                     <li class="spacer">&nbsp;</li>

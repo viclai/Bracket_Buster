@@ -32,6 +32,50 @@ function Bracket() {
   };
   this.total_teams = 64; // TODO: The First Four are excluded for now.
 
+  // User's bracket picks
+  this.user_data = {};
+  this.user_data['region1'] = {};
+  this.user_data['region2'] = {};
+  this.user_data['region3'] = {};
+  this.user_data['region4'] = {};
+  for (var r in this.user_data) {
+    for (var i = 0; i < Object.keys(this.preliminary_rounds).length - 1; i++) {
+      this.user_data[r][Object.keys(this.preliminary_rounds)[i]] = [];
+
+      for (var j = 0;
+           j < this.num_teams(Object.keys(this.preliminary_rounds)[i]) / 2;
+           j++) {
+
+        this.user_data[r][Object.keys(this.preliminary_rounds)[i]].push(
+          {
+            'team1' : {
+              "seed"  : "&nbsp;",
+              "name"  : "&nbsp;",
+              "score" : " "
+            },
+            'team2' : {
+              "seed"  : "&nbsp;",
+              "name"  : "&nbsp;",
+              "score" : " "
+            }
+          }
+        );
+      }
+    }
+  }
+  this.user_data['national'] = {};
+  for (var r in this.final_rounds) {
+    this.user_data['national'][r] = {};
+    for (var i = 0; i < this.final_rounds[r]; i++) {
+      this.user_data['national'][r]['team' + (i + 1)] = {
+        "seed"  : "&nbsp;",
+        "name"  : "&nbsp;",
+        "score" : " "
+      };
+    }
+  }
+
+  // Bracket with results and user's picks
   this.data = {};
   this.data['state'] = {};
   this.data['regions'] = {};
@@ -42,11 +86,38 @@ function Bracket() {
   for (var r in this.data['regions']) {
     for (var i = 0; i < Object.keys(this.preliminary_rounds).length - 1; i++) {
       this.data['regions'][r][Object.keys(this.preliminary_rounds)[i]] = [];
+
+      for (var j = 0;
+           j < this.num_teams(Object.keys(this.preliminary_rounds)[i]) / 2;
+           j++) {
+
+        this.data['regions'][r][Object.keys(this.preliminary_rounds)[i]].push(
+          {
+            'team1' : {
+              "seed"  : "&nbsp;",
+              "name"  : "&nbsp;",
+              "score" : " "
+            },
+            'team2' : {
+              "seed"  : "&nbsp;",
+              "name"  : "&nbsp;",
+              "score" : " "
+            }
+          }
+        );
+      }
     }
   }
   this.data['regions']['national'] = {};
   for (var r in this.final_rounds) {
     this.data['regions']['national'][r] = {};
+    for (var i = 0; i < this.final_rounds[r]; i++) {
+      this.data['regions']['national'][r]['team' + (i + 1)] = {
+        "seed"  : "&nbsp;",
+        "name"  : "&nbsp;",
+        "score" : " "
+      };
+    }
   }
 }
 
@@ -62,6 +133,7 @@ Bracket.prototype.print_data = function() {
   var team;
   var attr;
   var i;
+  var type;
 
   try {
     for (key in this.data['regions']) {
@@ -71,11 +143,14 @@ Bracket.prototype.print_data = function() {
         region = key;
         for (round in this.data['regions'][region]) {
           console.log('\t' + round + ':');
-          for (team in this.data['regions'][region][round]) {
-            console.log('\t\t' + team + ':')
-            for (attr in this.data['regions'][region][round][team]) {
-              console.log('\t\t\t' + attr + ':',
-                this.data['regions'][region][round][team][attr]);
+          for (type in this.data['regions'][region][round]) {
+            console.log('\t\t' + type + ':');
+            for (team in this.data['regions'][region][round][type]) {
+              console.log('\t\t\t' + team + ':')
+              for (attr in this.data['regions'][region][round][type][team]) {
+                console.log('\t\t\t\t' + attr + ':',
+                  this.data['regions'][region][round][type][team][attr]);
+              }
             }
           }
           console.log('\n');
@@ -89,14 +164,17 @@ Bracket.prototype.print_data = function() {
           } else {
             round = region_key;
             console.log('\t' + round + ':');
-            //this.data['regions'][region][round].forEach(function(game) {
             for (i = 0; i < this.data['regions'][region][round].length; i++) {
               game = this.data['regions'][region][round][i];
               console.log('\t\tgame', (i + 1) + ':');
-              for (team in game) {
-                console.log('\t\t\t' + team + ':');
-                for (attr in game[team]) {
-                  console.log('\t\t\t\t' + attr + ':', game[team][attr]);
+              for (type in game) {
+                console.log('\t\t\t' + type + ':');
+                for (team in game[type]) {
+                  console.log('\t\t\t\t' + team + ':');
+                  for (attr in game[type][team]) {
+                    console.log('\t\t\t\t\t' + attr + ':',
+                      game[type][team][attr]);
+                  }
                 }
               }
               console.log('\n');
@@ -189,6 +267,8 @@ Bracket.prototype.available_bracket_state = function() {
         }
       }
 
+    } else {
+      // TODO
     }
   }
   new_bracket['state'] = {};
@@ -225,7 +305,7 @@ Bracket.prototype.num_teams = function(sRound) {
     return -1;
 
   if (sRound in this.preliminary_rounds) {
-    return this.total_teams / (Math.pow(2, this.preliminary_rounds[sRound]) * this.regions.length);
+    return this.total_teams / (Math.pow(2, this.preliminary_rounds[sRound]) * 4);
   } else if (sRound in this.final_rounds) {
     return this.final_rounds[sRound];
   }

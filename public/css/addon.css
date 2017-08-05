@@ -53,6 +53,13 @@
   color: red;
 }
 
+#bb-options {
+  position: fixed;
+  width: 100%;
+  text-align: center;
+  background-color: #edf0f4;
+}
+
 li.game {
   padding-left: 20px;
 }
