@@ -33,7 +33,7 @@ BracketManager.prototype.id_region = function() {
  * @param {string} sHtml        - The HTML string containing bracket info.
  * @param {Object} oPredictions - The user's predictions.
  */
-BracketManager.prototype.populate_data = function(sHtml, oPredictions = null) {
+BracketManager.prototype.populate_data = function(sHtml, oPredictions) {
   var round_names;
   var final_4_teams = {};
   var $;
