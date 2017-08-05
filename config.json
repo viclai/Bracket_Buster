@@ -91,7 +91,6 @@
         // This is the public URL to your production add-on.
         "localBaseUrl": "https://bracket-buster.herokuapp.com",
         "store": {
-            "adapter": "jugglingdb",
             "type": "postgres",
             // Again, a PaaS host like Heroku will probably provide the db
             // connection URL to you through the environment, so we tell
