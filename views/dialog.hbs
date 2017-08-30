@@ -26,6 +26,9 @@
     <input id="bb-set" hidden/>
   {{/if}}
   <input id="bb-empty-bracket" value="{{bracketData.empty_bracket}}" hidden />
+  {{#with bracketData.regions.national.Champion.prediction.team1}}
+    <input id="bb-champion-pick" value="{{~seed~}}|{{~name~}}" hidden />
+  {{/with}}
   <div id="bb-options">
     <input type="radio" name="bb-option" value="picks_op" checked /> My Picks
     <input type="radio" name="bb-option" value="scores_op" /> Results

@@ -2,16 +2,20 @@
 
 function save_bracket(event, closeDialog) {
   var data;
-  console.log(closeDialog);
 
   if (event.action == 'bb.dialog.action') {
+    HipChat.dialog.updatePrimaryAction({
+      name: "Saving...",
+      enabled: false
+    });
+
     // Get data from radio input
     data = JSON.parse($('#bb-empty-bracket').val());
     $('.bb-team-pick:checked').each(function() {
       var name = $(this).attr('name');
       var hyphenIn = name.indexOf('-');
       var game = parseInt(name.slice(hyphenIn + 1, hyphenIn + 3));
-      var brack = Math.floor(game / 2);
+      var brack;
       var isTop = (game % 2) == 0;
       var round = parseInt(name[hyphenIn - 1]);
       var team = $(this).siblings('.bb-team-name').first().html();
@@ -46,6 +50,26 @@ function save_bracket(event, closeDialog) {
       else if (region_name != 'national')
         region_name = 'region' + region_name;
 
+      brack = Math.floor(
+        (game % Object.keys(data[region_name][rounds[round]]).length) / 2
+      );
+
+      if (round == 4) {
+        if (region_name == 'region1')
+          brack = 0;
+        else if (region_name == 'region3')
+          brack = 1;
+        else if (region_name == 'region2')
+          brack = 2;
+        else if (region_name == 'region4')
+          brack = 3;
+        region_name = 'national';
+      } else if (round == 5) {
+        if (!isTop) {
+          brack = 1;
+        }
+      }
+
       if (region_name != 'national') {
         if (isTop) {
           data[region_name][rounds[next_round]][brack]['team1']['seed'] = seed;
@@ -60,7 +84,7 @@ function save_bracket(event, closeDialog) {
       }
     });
 
-    // TODO: Save bracket picks
+    // Save bracket picks
     HipChat.auth.withToken(function(err, token) {
       if (err) {
         console.log('ERROR retrieving JWT');
@@ -75,6 +99,10 @@ function save_bracket(event, closeDialog) {
             // TODO
             console.log('BB bracket picks saved successfully.');
             console.log('Status:', status);
+            HipChat.dialog.updatePrimaryAction({
+              name: "Saved",
+              enabled: false
+            });
             closeDialog(true);
           },
           error: function(xhr, status, error) {
@@ -195,6 +223,7 @@ $(function () {
   $('.bb-team-name-real').hide();
   $('.bb-score').hide();
 
+  // Disable picks if bracket is set
   if ($('#bb-set').length != 0) {
     $('.bb-team-pick').prop('disabled', true);
   }
@@ -246,39 +275,43 @@ $(function () {
     });
   }
 
-  // TODO: Show checked inputs
+  // Show checked inputs
   $('.bb-team-name').each(function() {
     var pick = $(this).siblings('.bb-team-pick:first');
-    var name;
-    var next;
-    var hyphenIn;
-    var game;
-    var isTop;
+    var name = pick.attr('name');
+    var next = next_slot(name);
+    var hyphenIn = name.indexOf('-');
+    var game = parseInt(name.slice(hyphenIn + 1, hyphenIn + 3));
+    var isTop = (game % 2) == 0;
+    var round = parseInt(name[hyphenIn - 1]);
+    var champion = $('#bb-champion-pick');
+    var champion_name;
+    var champion_seed;
+    var team_name;
+    var team_seed;
 
-    if (/^round1/.test(pick.attr('name')) == false) {
-      if (pick.val() != String.fromCharCode(160)) {
-        $(this).siblings('.bb-team-pick:first').show();
-        // Make radio checked   
-        $(this).siblings('.bb-team-pick:first').prop('checked', true);
-        $(this).siblings('.bb-team-pick:first').attr('waschecked', true);
+    if (round == 6) {
+      if (champion.length) {
+        champion = champion.val().split('|');
+        champion_seed = champion[0];
+        champion_name = champion[1];
+        team_name = $(this).html();
+        team_seed = $(this).siblings('.bb-seed:first').html();
       }
-    } else {
-      // TODO: Check team in first round that advanced
-      name = pick.attr('name');
-      next = next_slot(name);
-      hyphenIn = name.indexOf('-');
-      game = parseInt(name.slice(hyphenIn + 1, hyphenIn + 3));
-      isTop = (game % 2) == 0;
+    }
 
-      if (isTop)
-        next = 'input[name="' + next + '"]:first';
-      else
-        next = 'input[name="' + next + '"]:last';
+    if (isTop)
+      next = 'input[name="' + next + '"]:first';
+    else
+      next = 'input[name="' + next + '"]:last';
 
-      if ($(next).val() == pick.val()) {
-        $(this).siblings('.bb-team-pick:first').prop('checked', true);
-        $(this).siblings('.bb-team-pick:first').attr('waschecked', true);
-      }
+    if (($(next).val() == pick.val()
+        && pick.val() != String.fromCharCode(160)) // 160 = &nbsp;
+        ||
+        (round == 6
+         && champion_seed == team_seed && champion_name == team_name)) {
+      $(this).siblings('.bb-team-pick:first').prop('checked', true);
+      $(this).siblings('.bb-team-pick:first').attr('waschecked', true);
     }
   });
 
@@ -438,7 +471,10 @@ $(function () {
 
   // Register a listener for the dialog button - primary action
   HipChat.register({
-    "dialog-button-click": save_bracket
+    "dialog-button-click": save_bracket,
+    "glance-update": function(data) {
+      // TODO: Event is triggered on glance updates
+    }
   });
 
 });
