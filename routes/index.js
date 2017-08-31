@@ -25,7 +25,8 @@ module.exports = function (app, addon) {
         // serve up
         'text/html': function () {
           var homepage = url.parse(addon.descriptor.links.homepage);
-          if (homepage.hostname === req.hostname && homepage.path === req.path) {
+          if (homepage.hostname === req.hostname
+              && homepage.path === req.path) {
             res.render('homepage', addon.descriptor);
           } else {
             res.redirect(addon.descriptor.links.homepage);
@@ -38,7 +39,7 @@ module.exports = function (app, addon) {
         }
       });
     }
-    );
+  );
 
   // This is an example route that's used by the default for the configuration
   // page
@@ -48,13 +49,13 @@ module.exports = function (app, addon) {
     addon.authenticate(),
     function (req, res) {
       // The `addon.authenticate()` middleware populates the following:
-      // * req.clientInfo: useful information about the add-on client such as the
-      //   clientKey, oauth info, and HipChat account info
+      // * req.clientInfo: useful information about the add-on client such as
+      //   the clientKey, oauth info, and HipChat account info
       // * req.context: contains the context data accompanying the request like
       //   the roomId
       res.render('config', req.context);
     }
-    );
+  );
 
   // This is an example glance that shows in the sidebar
   // https://developer.atlassian.com/hipchat/guide/glances
@@ -62,6 +63,7 @@ module.exports = function (app, addon) {
     cors(),
     addon.authenticate(),
     function (req, res) {
+      // Displayed in sidebar when addon is installed
       res.json({
         "label": {
           "type": "html",
@@ -76,7 +78,7 @@ module.exports = function (app, addon) {
         }
       });
     }
-    );
+  );
 
   // This is an example end-point that you can POST to update the glance info
   // Room update API: https://www.hipchat.com/docs/apiv2/method/room_addon_ui_update
@@ -86,6 +88,9 @@ module.exports = function (app, addon) {
     cors(),
     addon.authenticate(),
     function (req, res) {
+      // TODO: Display status for whether or not there are any games being
+      //       played today. Also display status for any changes to the
+      //       leaderboard.
       res.json({
         "label": {
           "type": "html",
@@ -100,7 +105,7 @@ module.exports = function (app, addon) {
         }
       });
     }
-    );
+  );
 
   // This is an example sidebar controller that can be launched when clicking
   // on the glance.
@@ -108,6 +113,7 @@ module.exports = function (app, addon) {
   app.get('/sidebar',
     addon.authenticate(),
     function (req, res) {
+      // TODO: Pass context data for current games being played and leaderboard
       res.render('sidebar', {
         identity: req.identity
       });
@@ -134,11 +140,11 @@ module.exports = function (app, addon) {
             'bracket-picks',
             req.clientInfo.clientKey).then(function(pred_data) {
               bracket_manager.populate_data(html, pred_data);
-              //console.log(JSON.stringify(bracket_manager.bracket.data));
               //bracket_manager.bracket.print_data(); // DEBUG
               if (Object.keys(bracket_manager.bracket.data).length !== 0) {
                 view_context['bracketData'] = bracket_manager.bracket.data;
               }
+              //view_context['bracketData'] = bracket_manager.bracket.unavailable_bracket_state(); // DEBUG
               //view_context['bracketData'] = bracket_manager.bracket.available_bracket_state(); // DEBUG
               //view_context['bracketData'] = bracket_manager.bracket.set_bracket_state(); // DEBUG
               view_context['identity'] = req.identity;
@@ -157,12 +163,13 @@ module.exports = function (app, addon) {
     }
   );
 
+  // This is an endpoint used to store/save a user's bracket picks.
   app.post('/bracket_pick',
     addon.authenticate(),
     function (req, res) {
       // Use addon.settings to store bracket picks
       addon.settings.set(
-        'bracket-picks',
+        'bracket-picks', // TODO: 'bracket-picks-' + req.identity.userId
         req.body.data,
         req.clientInfo.clientKey
       ).then(function() {
@@ -219,17 +226,28 @@ module.exports = function (app, addon) {
   // https://developer.atlassian.com/hipchat/guide/installation-flow
   addon.on('installed', function (clientKey, clientInfo, req) {
     hipchat.sendMessage(clientInfo, req.body.roomId, 'The ' +
-      addon.descriptor.name + ' add-on has been installed in this room');
+      addon.descriptor.name + ' add-on has been installed in this room'
+    );
   });
 
   // Clean up clients when uninstalled
   addon.on('uninstalled', function (id) {
-    addon.settings.client.keys(id + ':*', function (err, rep) {
-      rep.forEach(function (k) {
-        addon.logger.info('Removing key:', k);
-        addon.settings.client.del(k);
-      });
-    });
+    // TODO: See if there's a better method that can be used that does not
+    //       expose the API of jugglingdb. Something similar to
+    //       addon.settings.set() would be nice.
+    addon.settings.schema.models.AddonSettings.all(
+      {"where" : {"clientKey" : id}}, function(err, rows) {
+        if (err) {
+          console.log("ERROR retrieving rows from database with client key",
+            id);
+        } else {
+          rows.forEach(function(row) {
+            row.destroy();
+          });
+          console.log("Deleted all rows associated with client key", id);
+        }
+      }
+    );
   });
 
 };
