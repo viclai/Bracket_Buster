@@ -27,8 +27,8 @@
                   <!-- Remove style and 'disabled' to enable again. -->
                   <a href="https://www.hipchat.com/addons/install?url={{links.self}}"
                     class="aui-button aui-button-primary"
-                    title="Install this add-on in HipChat"
-                    style="pointer-events: none" disabled>
+                    title="Install this add-on in HipChat">
+                    <!--style="pointer-events: none"-->
                     <span class="aui-icon aui-icon-small aui-iconfont-hipchat">
                     </span>
                     Add to HipChat
@@ -55,9 +55,111 @@
             <div class="aui-group">
               <div class="aui-item">
                 <p>
+                  <strong class="aui-nav-heading">
+                    March Madness Season:
+                  </strong>
+                  <span class="aui-lozenge aui-lozenge-error">OFF</span>
+                </p>
+                <p class="aui-message warning">
                   This add-on is currently in development, but feel free to
                   install it and check it out! Not all features are currently
                   functional.
+                </p>
+
+                <p>
+                  This HipChat add-on allows users in a HipChat room to fill
+                  out their own March Madness brackets and see how well their
+                  predictions match up with those of their colleagues as the
+                  games are played during the tournament. <i>Bracket Buster</i>
+                  is perfect for workplace teams that already use HipChat to
+                  have a little fun and see how their brackets hold up (or get
+                  busted).
+                </p>
+                <p>
+                  This bot aims to make it more convenient and flexible than
+                  other websites (e.g. ESPN, CBS Sports) to fill out a March
+                  Madness bracket and share it with colleagues.
+                </p>
+
+                <br />
+                <hr />
+
+                <h3>View Bracket</h3>
+                <p>
+                  Users can view the current bracket by clicking the input
+                  action in the input field at the bottom of the page:
+                </p>
+                <br />
+                <div style="text-align: center;">
+                  <img src="/img/view_bracket.gif" alt="View Bracket" />
+                </div>
+                <p>
+                  A dialog box containing the bracket will appear. Scroll down
+                  to see the teams in each region of the bracket.
+                </p>
+
+                <h3>View Results</h3>
+                <p>
+                  In the same dialog window, users can view the games that have
+                  been completed by clicking the <i>Results</i> button fixed to
+                  the top of the dialog window:
+                </p>
+                <br />
+                <div style="text-align: center;">
+                  <img src="/img/view_results.gif" alt="View Results" />
+                </div>
+                <p>
+                  By using those two buttons at the top of the dialog window,
+                  the user's picks can easily be compared with the results.
+                </p>
+
+                <h3>Fill Out Bracket</h3>
+                <p>
+                  HipChat users can easily make their picks by clicking on the
+                  radio buttons to indicate their predicted winners of each
+                  game:
+                </p>
+                <br />
+                <div style="text-align: center;">
+                  <img src="/img/choose_picks.gif" alt="Choose Picks" />
+                </div>
+                
+                <p>
+                  If the user wants to take back his/her pick, the selected
+                  radio button in a given round can be clicked on, and the team
+                  corresponding to that button will be erased if they appear as
+                  the winner of games in the subsequent rounds:
+                </p>
+                <br />
+                <div style="text-align: center;">
+                  <img src="/img/undo_pick.gif" alt="Undo Pick" />
+                </div>
+
+                <p>
+                  Moreover, a change can be made for the winner of a given
+                  game, and the team that was previously selected to win will
+                  be erased if they appear as the winner of subsequent games:
+                </p>
+                <br />
+                <div style="text-align: center;">
+                  <img src="/img/change_pick.gif" alt="Change Pick" />
+                </div>
+
+                <p>
+                  If the user needs more time to think about his/her picks, the
+                  bracket can be saved by clicking on <i>Save Bracket</i> in
+                  the lower-right of the dialog window:
+                </p>
+                <br />
+                <div style="text-align: center;">
+                  <img src="/img/save_bracket.gif" alt="Save Bracket" />
+                </div>
+                <p>
+                  The state of the bracket will be retained when the user
+                  wishes to view his/her bracket again.Once the tournament
+                  games start, users will no longer be able to make changes to
+                  their brackets. The bracket that was last saved will be the
+                  one that is submitted.
                 </p>
               </div>
             </div>

@@ -1,7 +1,7 @@
 {
   "key": "bb-add-on",
   "name": "Bracket Buster",
-  "description": "A HipChat add-on to challenge your colleagues in predicting March Madness games.",
+  "description": "A HipChat add-on for March Madness season.",
   "vendor": {
     "name": "Victor Lai",
     "url": "https://viclai.github.io/"
@@ -69,7 +69,7 @@
           "style": "normal",
           "primaryAction": {
             "name": {
-              "value": "Submit Bracket"
+              "value": "Save Bracket"
             },
             "key": "bb.dialog.action",
             "enabled": true
