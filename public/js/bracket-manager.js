@@ -205,7 +205,6 @@ BracketManager.prototype.populate_data = function(sHtml, oPredictions) {
       round = round_names[ii];
       games = $(this).children('div');
 
-      //manager.bracket.data['regions']['national'][round] = {};
       manager.bracket.data['regions']['national'][round] = {};
       manager.bracket.data['regions']['national'][round]['result'] = {};
       manager.bracket.data['regions']['national'][round]['prediction'] = {};
@@ -249,7 +248,7 @@ BracketManager.prototype.populate_data = function(sHtml, oPredictions) {
             
             if (oPredictions != null) {
               manager.bracket.data['regions']['national'][round]['prediction'][final_4_team] =
-                oPredictions['national'][round][final_4_team]
+                oPredictions['national'][round][final_4_team];
             } else {
               manager.bracket.data['regions']['national'][round]['prediction'][final_4_team] = {
                 "name"  : "&nbsp;",
